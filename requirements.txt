@@ -1,0 +1,12 @@
+# Faktomat Live — Python-Abhängigkeiten
+#
+# Schritt 1 (Scoring-Referenz) nutzt ausschließlich die Standardbibliothek.
+# Python 3.11+ vorausgesetzt (getestet mit 3.12).
+#
+# Server (Schritt 2):
+fastapi
+uvicorn[standard]
+
+# Test:
+httpx          # ASGI-Testclient für FastAPI (TestClient-Backend)
+pytest

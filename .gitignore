@@ -1,0 +1,26 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# --- Node ---
+node_modules/
+package-lock.json
+
+# --- Rohdaten (Regel 7: Rohdaten nie ins Repo) ---
+# Echte Items/Benchmark von Stolp sind NICHT öffentlich zu committen,
+# bis Lizenz/Freigabe geklärt ist (Abhängigkeiten A, B in UEBERGABE 2).
+# items.json im Root = die ECHTEN Item-Texte (Codebook Interventionsstudie).
+data/raw/
+/items.json
+items.real.json
+benchmark.real.json
+
+# --- OS / Editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

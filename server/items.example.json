@@ -1,0 +1,174 @@
+{
+  "version": "example-0",
+  "source": "PLATZHALTER — NICHT die echten Faktomat-Items. Ersetzen durch Stolp/OSF osf.io/wuvk5 (UEBERGABE 2, Abhängigkeit A).",
+  "items": [
+    {
+      "id": "ex_l_t_01",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_t_01 — Domäne climate.",
+      "truth_value": true,
+      "task": "left",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_l_t_02",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_t_02 — Domäne security.",
+      "truth_value": true,
+      "task": "left",
+      "domain": "security"
+    },
+    {
+      "id": "ex_l_t_03",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_t_03 — Domäne climate.",
+      "truth_value": true,
+      "task": "left",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_l_t_04",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_t_04 — Domäne security.",
+      "truth_value": true,
+      "task": "left",
+      "domain": "security"
+    },
+    {
+      "id": "ex_l_t_05",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_t_05 — Domäne climate.",
+      "truth_value": true,
+      "task": "left",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_l_t_06",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_t_06 — Domäne security.",
+      "truth_value": true,
+      "task": "left",
+      "domain": "security"
+    },
+    {
+      "id": "ex_l_f_01",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_f_01 — Domäne climate.",
+      "truth_value": false,
+      "task": "left",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_l_f_02",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_f_02 — Domäne security.",
+      "truth_value": false,
+      "task": "left",
+      "domain": "security"
+    },
+    {
+      "id": "ex_l_f_03",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_f_03 — Domäne climate.",
+      "truth_value": false,
+      "task": "left",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_l_f_04",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_f_04 — Domäne security.",
+      "truth_value": false,
+      "task": "left",
+      "domain": "security"
+    },
+    {
+      "id": "ex_l_f_05",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_f_05 — Domäne climate.",
+      "truth_value": false,
+      "task": "left",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_l_f_06",
+      "text": "[PLATZHALTER] Beispielaussage ex_l_f_06 — Domäne security.",
+      "truth_value": false,
+      "task": "left",
+      "domain": "security"
+    },
+    {
+      "id": "ex_r_t_01",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_t_01 — Domäne climate.",
+      "truth_value": true,
+      "task": "right",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_r_t_02",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_t_02 — Domäne security.",
+      "truth_value": true,
+      "task": "right",
+      "domain": "security"
+    },
+    {
+      "id": "ex_r_t_03",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_t_03 — Domäne climate.",
+      "truth_value": true,
+      "task": "right",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_r_t_04",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_t_04 — Domäne security.",
+      "truth_value": true,
+      "task": "right",
+      "domain": "security"
+    },
+    {
+      "id": "ex_r_t_05",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_t_05 — Domäne climate.",
+      "truth_value": true,
+      "task": "right",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_r_t_06",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_t_06 — Domäne security.",
+      "truth_value": true,
+      "task": "right",
+      "domain": "security"
+    },
+    {
+      "id": "ex_r_f_01",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_f_01 — Domäne climate.",
+      "truth_value": false,
+      "task": "right",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_r_f_02",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_f_02 — Domäne security.",
+      "truth_value": false,
+      "task": "right",
+      "domain": "security"
+    },
+    {
+      "id": "ex_r_f_03",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_f_03 — Domäne climate.",
+      "truth_value": false,
+      "task": "right",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_r_f_04",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_f_04 — Domäne security.",
+      "truth_value": false,
+      "task": "right",
+      "domain": "security"
+    },
+    {
+      "id": "ex_r_f_05",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_f_05 — Domäne climate.",
+      "truth_value": false,
+      "task": "right",
+      "domain": "climate"
+    },
+    {
+      "id": "ex_r_f_06",
+      "text": "[PLATZHALTER] Beispielaussage ex_r_f_06 — Domäne security.",
+      "truth_value": false,
+      "task": "right",
+      "domain": "security"
+    }
+  ]
+}
