@@ -27,7 +27,8 @@ import os
 from pathlib import Path
 
 from fastapi import Body, FastAPI, Header, HTTPException, Path as PathParam
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from .aggregate import aggregate_scores
 from .items import ItemSet, ItemValidationError, load_items
@@ -49,7 +50,20 @@ def _load_itemset() -> ItemSet:
 ITEMS = _load_itemset()
 STORE = SessionStore()
 
-app = FastAPI(title="Faktomat Live", version="0.2.0")
+# Vanilla-JS-Client (Teilnehmer-View); Module unter /static.
+_CLIENT_DIR = Path(__file__).parent.parent / "client"
+
+# Benchmark-Overlay (Feature-Flag, UEBERGABE 5/6): Datei da -> Overlay an,
+# Datei fehlt -> App läuft ohne (Reveal-Stufe 2 ohne Vergleichsverteilung).
+_BENCHMARK_PATH = Path(os.environ.get(
+    "FAKTOMAT_BENCHMARK", str(Path(__file__).parent.parent / "benchmark.json")))
+BENCHMARK: dict | None = (
+    json.loads(_BENCHMARK_PATH.read_text(encoding="utf-8"))
+    if _BENCHMARK_PATH.is_file() else None
+)
+
+app = FastAPI(title="Faktomat Live", version="0.3.0")
+app.mount("/static", StaticFiles(directory=str(_CLIENT_DIR)), name="static")
 
 
 # --- Hilfen ----------------------------------------------------------------
@@ -69,6 +83,27 @@ def _require_host(session, token: str | None) -> None:
 
 
 # --- Endpunkte -------------------------------------------------------------
+
+@app.get("/host/{code}")
+def host_page(code: str = PathParam(...)) -> FileResponse:
+    """
+    Host-View (Beamer). Die Seite selbst ist ohne Token abrufbar — alle
+    Daten-Endpunkte dahinter verlangen das Host-Token, das der Host als
+    ?token=... in der URL mitbringt (liest das JS aus).
+    """
+    _require_session(code)
+    return FileResponse(_CLIENT_DIR / "host.html", media_type="text/html")
+
+
+@app.get("/join/{code}")
+def join_page(code: str = PathParam(...)) -> FileResponse:
+    """
+    Teilnehmer-View. Nur für existierende Sessions (404 sonst) — Items und
+    truth_values werden nicht öffentlich verlinkt (UEBERGABE 3, Hinweis).
+    """
+    _require_session(code)
+    return FileResponse(_CLIENT_DIR / "join.html", media_type="text/html")
+
 
 @app.post("/api/session")
 def create_session() -> dict:
@@ -131,25 +166,36 @@ def submit(code: str = PathParam(...), payload: dict = Body(...)) -> dict:
 
 @app.get("/api/session/{code}/stream")
 async def stream(code: str = PathParam(...),
+                 token: str | None = None,
+                 once: bool = False,
                  x_host_token: str | None = Header(default=None)) -> StreamingResponse:
     """
-    SSE-Stream für den Host: sendet {submitted: n} bei jeder Änderung.
-    Auth via X-Host-Token-Header.
+    SSE-Stream für den Host: {joined, submitted, reveal_stage} bei Änderung.
+
+    Auth via X-Host-Token-Header ODER ?token=... — die EventSource-API im
+    Browser kann keine Header setzen, daher der Query-Parameter. Unkritisch,
+    weil wir keine Access-Logs führen (UEBERGABE 7.2).
+
+    ?once=1 beendet den Stream nach dem ersten Event — für Tests und für
+    curl-Diagnose am Eventtag (ein endlicher Response statt Endlosstream).
 
     X-Accel-Buffering: no wird fest gesetzt (UEBERGABE 3a.3): nginx/Apache
     buffern SSE sonst weg. Schadet ohne Proxy nicht.
     """
     session = _require_session(code)
-    _require_host(session, x_host_token)
+    _require_host(session, x_host_token or token)
 
     async def event_generator():
-        last = -1
+        last = None
         while True:
-            current = session.submitted_count
+            current = (session.joined, session.submitted_count, session.reveal_stage)
             if current != last:
                 last = current
-                data = json.dumps({"submitted": current, "reveal_stage": session.reveal_stage})
+                data = json.dumps({"joined": current[0], "submitted": current[1],
+                                   "reveal_stage": current[2]})
                 yield f"data: {data}\n\n"
+                if once:
+                    return
             await asyncio.sleep(1.0)
 
     return StreamingResponse(
@@ -189,4 +235,8 @@ def aggregate(code: str = PathParam(...),
     """
     session = _require_session(code)
     _require_host(session, x_host_token)
-    return aggregate_scores(session.scores, session.reveal_stage)
+    result = aggregate_scores(session.scores, session.reveal_stage)
+    # Benchmark-Overlay ab Stufe 2, nur wenn die Datei vorhanden ist (Flag).
+    if session.reveal_stage >= 2 and result.get("gate_open") and BENCHMARK is not None:
+        result["benchmark"] = BENCHMARK
+    return result

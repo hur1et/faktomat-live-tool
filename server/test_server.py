@@ -187,6 +187,78 @@ def test_reveal_opens_at_15(client):
     assert r.json()["reveal_stage"] == 2
 
 
+# --- Host-View: Seite, SSE-Auth, Join-Zähler, Benchmark-Flag ----------------
+
+def test_host_page_served(client):
+    code, _ = _new_session(client)
+    r = client.get(f"/host/{code}")
+    assert r.status_code == 200
+    assert "Host" in r.text
+
+
+def test_stream_rejects_missing_token(client):
+    code, _ = _new_session(client)
+    assert client.get(f"/api/session/{code}/stream").status_code == 403
+
+
+def test_stream_accepts_query_token(client):
+    code, host_token = _new_session(client)
+    # ?once=1 -> endlicher Stream, sonst deadlockt der synchrone TestClient
+    # am unendlichen SSE-Generator.
+    r = client.get(f"/api/session/{code}/stream?token={host_token}&once=1")
+    assert r.status_code == 200
+    line = next(l for l in r.text.splitlines() if l.startswith("data:"))
+    payload = json.loads(line[5:])
+    assert {"joined", "submitted", "reveal_stage"} <= set(payload)
+
+
+def test_joined_counter_increments():
+    from server.store import SessionStore
+    store = SessionStore()
+    s = store.create_session()
+    store.issue_participant_token(s.code)
+    store.issue_participant_token(s.code)
+    assert store.get(s.code).joined == 2
+
+
+def test_benchmark_attached_at_stage2(monkeypatch, tmp_path):
+    bench = {"source": "test", "d_prime": {"bin_edges": [0, 1], "densities": [1.0]},
+             "b_prime": {"bin_edges": [-1, 1], "densities": [0.5]}}
+    bp = tmp_path / "benchmark.json"
+    bp.write_text(json.dumps(bench), encoding="utf-8")
+    monkeypatch.setenv("FAKTOMAT_ITEMS", str(EXAMPLE))
+    monkeypatch.setenv("FAKTOMAT_BENCHMARK", str(bp))
+    import server.app as app_module
+    importlib.reload(app_module)
+    c = TestClient(app_module.app)
+
+    body = c.post("/api/session").json()
+    code, host_token = body["code"], body["host_token"]
+    for _ in range(15):
+        t = c.post(f"/api/session/{code}/join").json()["participant_token"]
+        c.post(f"/api/session/{code}/submit",
+               json={"participant_token": t, "d_prime": 0.5, "b_prime": 0.1})
+    c.post(f"/api/session/{code}/reveal", json={"stage": 2},
+           headers={"X-Host-Token": host_token})
+    agg = c.get(f"/api/session/{code}/aggregate",
+                headers={"X-Host-Token": host_token}).json()
+    assert agg["benchmark"]["source"] == "test"
+    assert "kde" in agg["b_prime"]
+
+
+# --- Teilnehmer-View (statische Auslieferung) -------------------------------
+
+def test_join_page_served_for_existing_session(client):
+    code, _ = _new_session(client)
+    r = client.get(f"/join/{code}")
+    assert r.status_code == 200
+    assert "Faktomat Live" in r.text
+
+
+def test_join_page_404_for_unknown_session(client):
+    assert client.get("/join/deadbeef").status_code == 404
+
+
 # --- Aggregate-Endpunkt (Auth + Gate durchgereicht) ------------------------
 
 def test_aggregate_requires_host_token(client):

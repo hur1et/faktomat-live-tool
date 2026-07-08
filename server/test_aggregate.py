@@ -17,6 +17,7 @@ from server.aggregate import (
     Bin,
     aggregate_scores,
     histogram,
+    kde,
     merge_small_bins,
 )
 from server.store import MIN_PARTICIPANTS_FOR_REVEAL
@@ -88,6 +89,31 @@ def test_merge_all_bins_reach_threshold_or_collapse():
     merged = merge_small_bins(bins)
     assert len(merged) == 1 or all(b.count >= MIN_BIN_COUNT for b in merged)
     assert sum(b.count for b in merged) == 6
+
+
+# --- KDE ---------------------------------------------------------------------
+
+def test_kde_integrates_to_one():
+    values = [0.1, 0.4, -0.2, 0.9, -0.5, 0.3, 0.0, 0.6, -0.1, 0.2] * 2
+    k = kde(values)
+    # Trapezregel über das Gitter: Gesamtmasse muss ~1 sein.
+    area = sum((k["density"][i] + k["density"][i + 1]) / 2 *
+               (k["x"][i + 1] - k["x"][i]) for i in range(len(k["x"]) - 1))
+    assert abs(area - 1.0) < 0.01, area
+
+
+def test_kde_peak_near_data_center():
+    values = [0.5] * 10 + [0.51] * 10
+    k = kde(values)
+    peak_x = k["x"][k["density"].index(max(k["density"]))]
+    assert abs(peak_x - 0.505) < 0.1
+
+
+def test_kde_identical_values_defined():
+    # SD = 0 -> Silverman-Fallback muss greifen, keine Division durch null.
+    k = kde([1.0] * 20)
+    assert all(d >= 0 for d in k["density"])
+    assert k["bandwidth"] > 0
 
 
 # --- Aggregat + Gate + Stufen ---------------------------------------------

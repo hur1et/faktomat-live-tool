@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Faktomat Live — Host</title>
+<style>
+  /* Beamer-View im CD FAKT-O-MAT (Kallinich): Gelb #f2e61a, Orange #ef7d00,
+     Schwarz #1a1a1a, Montserrat (hier als Webfont — Beamer-Gerät, keine
+     Mobilfunk-Restriktion). Farbwerte aus faktomat_flyer. */
+  @font-face {
+    font-family: 'Montserrat';
+    src: url('/static/assets/fonts/Montserrat[wght].ttf') format('truetype-variations');
+    font-weight: 100 900; font-display: swap;
+  }
+  :root { --fg: #1a1a1a; --bg: #ffffff; --accent: #ef7d00; --gelb: #f2e61a;
+          --muted: #555555; --bench: #c8c8c8; --grau-bg: #f4f4f2; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+    color: var(--fg); background: var(--bg);
+    padding: 2rem 3rem; line-height: 1.4;
+  }
+  header { display: flex; justify-content: space-between; align-items: center; }
+  .brand { height: 3rem; }
+  h1 { font-size: 1.6rem; }
+  #progress { font-size: 2.4rem; font-weight: 700; }
+  #progress small { font-size: 1.1rem; font-weight: 400; color: var(--muted); }
+  #controls { margin: 1.5rem 0; display: flex; gap: 0.75rem; align-items: center; }
+  button {
+    font-family: inherit; font-size: 1.05rem; font-weight: 700;
+    padding: 0.7rem 1.3rem;
+    border: 2px solid var(--fg); border-radius: 0.5rem;
+    background: var(--bg); color: var(--fg); cursor: pointer;
+  }
+  button.active { background: var(--gelb); }
+  button:disabled { opacity: 0.35; cursor: not-allowed; }
+  #demo-btn { margin-left: auto; border-style: dashed; font-weight: 400; }
+  #gate-hint, #status { color: var(--muted); font-size: 0.95rem; }
+  #demo-banner {
+    display: none; background: #fff3cd; border: 1px solid #b8860b;
+    color: #7a5b00; padding: 0.5rem 1rem; border-radius: 0.5rem;
+    margin-bottom: 1rem; font-weight: 600;
+  }
+  #frame-title { font-size: 1.35rem; margin-bottom: 0.5rem; min-height: 1.8rem; }
+  #chart { width: 100%; height: 62vh; }
+  #legend { color: var(--muted); font-size: 0.95rem; margin-top: 0.5rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <img class="brand" src="/static/assets/fom-rgb.svg" alt="FAKT-O-MAT">
+  <div id="progress">– <small>abgeschlossen</small> / – <small>beigetreten</small></div>
+</header>
+
+<div id="controls">
+  <button id="stage-1">Stufe 1 — Unterscheidung d′</button>
+  <button id="stage-2">Stufe 2 — Asymmetrie b′</button>
+  <button id="stage-3">Stufe 3 — Raum-Marker</button>
+  <span id="gate-hint"></span>
+  <button id="demo-btn">Demo-Modus</button>
+</div>
+
+<div id="demo-banner">DEMO-MODUS — synthetische Daten, keine echten Teilnahmen</div>
+<p id="frame-title"></p>
+<svg id="chart" preserveAspectRatio="none"></svg>
+<p id="legend"></p>
+<p id="status"></p>
+
+<script type="module" src="/static/host.js"></script>
+</body>
+</html>

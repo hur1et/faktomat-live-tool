@@ -43,6 +43,8 @@ class Session:
     # Teilnahme-Tokens, die schon abgegeben haben (Ein-Submit-Regel).
     submitted_tokens: set[str] = field(default_factory=set)
     reveal_stage: int = 0
+    # Reiner Zähler für die Host-Anzeige "X von Y" — keine Personendaten.
+    joined: int = 0
 
     @property
     def submitted_count(self) -> int:
@@ -80,8 +82,10 @@ class SessionStore:
     def issue_participant_token(self, code: str) -> str:
         """Vergibt ein Teilnahme-Token beim Join. Wirft KeyError bei unbekanntem Code."""
         with self._lock:
-            if code not in self._sessions:
+            session = self._sessions.get(code)
+            if session is None:
                 raise KeyError(code)
+            session.joined += 1
         return secrets.token_urlsafe(18)
 
     def submit(self, code: str, token: str, d_prime: float, b_prime: float) -> int:

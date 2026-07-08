@@ -16,6 +16,7 @@ package-lock.json
 # items.json im Root = die ECHTEN Item-Texte (Codebook Interventionsstudie).
 data/raw/
 /items.json
+/benchmark.json
 items.real.json
 benchmark.real.json
 

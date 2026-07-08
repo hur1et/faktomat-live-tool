@@ -6,6 +6,87 @@ verweisen auf den Arbeitsplan in `UEBERGABE_faktomat-live.md` Abschnitt 9.
 
 ## [Unreleased]
 
+### Schritt 6 — CD-konforme Gestaltung (FAKT-O-MAT-CD aus faktomat_flyer)
+
+- CD-Assets nach `client/assets/` übernommen: Logo `fom-rgb.svg` (1,6 KB),
+  gelbe Form `fom-gf.svg` (0,5 KB), Montserrat variable TTF (745 KB).
+  Quelle: `projects/faktomat_flyer` (Kallinich-CD; Farbwerte aus
+  rollup_faktomat_FINAL.html): Gelb #f2e61a, Orange #ef7d00, Schwarz #1a1a1a,
+  Grau #f4f4f2, Montserrat.
+- Teilnehmer-View: CD-Farben, Logo, Claim-Box mit Gelb-Kante, gelbe
+  Primär-Buttons (Schwarz auf Gelb — Kontrast), Ergebniswerte in Orange.
+  Webfont hier BEWUSST nicht geladen (745 KB vs. Mobilfunk, UEBERGABE 3) —
+  Montserrat-Fallback-Stack; Seite bleibt ~15 KB.
+- Host-View: Montserrat via @font-face (Beamer-Gerät), Logo im Header,
+  aktive Stufe gelb, KDE/Balken in CD-Orange #ef7d00.
+- Verifiziert: 41 Python-Tests grün, Assets/Seiten am laufenden Server geprüft.
+
+### Schritt 4 — Host-View (auf `dev`)
+
+- `server/aggregate.py`: serverseitige Gauß-KDE (Silverman-Bandbreite) —
+  Rohwerte verlassen den Server nie, ausgeliefert wird nur das Gitter.
+  b′-KDE ab Reveal-Stufe 2 im Aggregate. Median gerundet.
+- `server/app.py`: `GET /host/{code}`; SSE akzeptiert `?token=` (EventSource
+  kann keine Header) und `?once=1` (endlicher Stream für Tests/curl-Diagnose);
+  SSE-Payload um `joined` erweitert (Zähler in `store.py`, keine Personendaten);
+  Benchmark-Feature-Flag `FAKTOMAT_BENCHMARK` (Datei fehlt → Overlay aus).
+- `client/host.html` + `client/host.js`: Fortschritt („X abgeschlossen / Y
+  beigetreten"), drei manuell ausgelöste Reveal-Stufen mit Gate-Anzeige,
+  Charts als handgerolltes SVG (BEWUSST kein D3: keine externe Abhängigkeit
+  am Eventtag; KDE kommt fertig vom Server — Abweichung von UEBERGABE-3-
+  Präferenz, dokumentiert). Balkenhöhen als Dichten (Merge-Bins ungleich
+  breit!). Demo-Modus rein clientseitig, gelb gebannert, ohne Server.
+- `MODERATION.md`: Briefing nach UEBERGABE 6 (Frames, b′-Sprachregelung,
+  erwartbares Links-b′, Anonymitätsregeln, Technik-Ausfall).
+- Fix: SSE-Test deadlockte am unendlichen Generator → `?once=1`.
+- Tests: 41 Python + 13 JS grün. Smoke am echten Server: Host-Seite, SSE
+  (joined/submitted), Stufe 3 mit 100-Punkt-KDE + Benchmark (N=1518) + Median.
+
+### Benchmark-Overlay aus IBE 2.4 (Abhängigkeit B, Fallback-Pfad)
+
+- `scoring/compute_benchmark.py` — rechnet d′/b′ aller 1.518 Completes der
+  IBE-2.4-Erhebung (meta-d-pipeline, `dataset2_IBE24.csv` — ACHTUNG: dataset**2**
+  = Welle 2.**4**) mit derselben Hautus-Korrektur wie das Live-Tool und schreibt
+  NUR Aggregate nach `benchmark.json` (gitignored): 40-Bin-Histogramm,
+  Perzentile p1–p99, Summary. Truth-Key aus `config/item_key_ibe24.json`
+  (verifiziert, Stolp Jan 2026), inkl. AddIBE-Spalten-Mapping für IBE11/12/17/18.
+- Validierung: mean d′ = 0.4451 vs. 0.451 in Stolps eigener Type-1-Replikation
+  (Differenz = andere Randkorrektur) ✅. b′: M = 0.11, Md = 0.00, SD = 0.68.
+- Item-Plausibilisierung nach Julius' Hinweis (aufsteigende Nummerierung):
+  alle 24 Texte inhaltlich gegen truth_value/task/domain geprüft — konsistent.
+  Restrisiko Text↔ID dokumentiert; finale Absicherung braucht das
+  Codebook_Interventionsstudie.xlsx (nicht im Workspace). Präzedenzfall 2.3
+  (v_12/v_13-Codebook-Fehler) bekannt.
+- OFFEN: Repräsentativität der 2.4-Stichprobe unbestätigt → Event-Framing
+  („…von Deutschland?") vor Nutzung mit Stolp klären. Kategorien-Schwellen des
+  Original-Faktomat (links-progressiv…rechts-konservativ) unbekannt →
+  nachfragen oder Quintile verwenden.
+
+### Schritt 3 — Teilnehmer-View (auf `dev`)
+
+Hinzugefügt:
+- `client/join.html` — mobile-first, drei Screens: Datenschutzhinweis
+  (Wortlaut nach UEBERGABE 7.4) → Item-Schleife → privates Feedback.
+  CSS inline, daumentaugliche Buttons, Payload gesamt ~15 KB.
+- `client/app.js` — Ablauf: Join (Token in sessionStorage, kein Cookie) →
+  Items laden → Fisher-Yates-Shuffle → 24 Antworten → Scoring LOKAL →
+  Submit nur {d′, b′} → Feedback. Antwortliste wird nie serialisiert.
+- `client/submit-queue.js` — Retry mit exponentiellem Backoff (1/2/4/8 s,
+  max. 5 Versuche); 4xx terminal (409 wird nicht wiederholt), Netzfehler/5xx
+  transient. fetch/sleep injizierbar → ohne Browser testbar.
+- `client/submit-queue.test.mjs` — 5 Tests (Backoff-Abfolge, 409-Terminalität,
+  Aufgabe nach 5 Versuchen). JS-Suite jetzt 13 Tests.
+- `server/app.py`: `GET /join/{code}` (404 bei unbekannter Session — Items
+  nicht öffentlich verlinkt) + `/static`-Mount. 2 neue Endpunkt-Tests.
+
+Repo:
+- Erster Commit auf `main` (e4d2404, Schritt 1+2); `dev` angelegt (Regel 12).
+- Echte `items.json` via .gitignore vom Repo ausgeschlossen, bis die Freigabe
+  der Item-Texte geklärt ist (UEBERGABE 2, Abhängigkeit A).
+
+Testsumme: **33 Python + 13 JS = alle grün.** Browser-Durchlauf auf echten
+Geräten steht aus (Generalprobe, Schritt 5).
+
 ### Item-Balance: Ground Truth korrigiert (Entscheidung Julius, 2026-07-03)
 
 - Die reale `items.json` (Codebook Interventionsstudie) ist **14 wahr / 10 falsch**,

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Faktomat Live</title>
+<style>
+  /* Mobile-first, daumentauglich (UEBERGABE 8). CD FAKT-O-MAT (Kallinich):
+     Gelb #f2e61a, Orange #ef7d00, Schwarz #1a1a1a, Grau #f4f4f2, Montserrat.
+     Webfont hier BEWUSST nicht geladen (745 KB, Mobilfunk) — Fallback-Stack.
+     Farbwerte aus faktomat_flyer (rollup_faktomat_FINAL.html). */
+  :root {
+    --gelb: #f2e61a; --orange: #ef7d00; --schwarz: #1a1a1a;
+    --grau-bg: #f4f4f2; --grau-dk: #555555; --weiss: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+    color: var(--schwarz); background: var(--weiss);
+    max-width: 34rem; margin: 0 auto; padding: 1.25rem;
+    line-height: 1.5;
+  }
+  .brand { height: 2.2rem; margin-bottom: 1rem; display: block; }
+  h1 { font-size: 1.3rem; margin-bottom: 0.75rem; text-transform: uppercase;
+       letter-spacing: 0.02em; }
+  p { margin-bottom: 0.75rem; }
+  .muted { color: var(--grau-dk); font-size: 0.9rem; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .claim {
+    font-size: 1.15rem; font-weight: 600;
+    margin: 1.25rem 0 1.5rem; min-height: 6rem;
+    background: var(--grau-bg); border-left: 0.4rem solid var(--gelb);
+    padding: 1rem;
+  }
+  .progress { color: var(--grau-dk); font-size: 0.9rem; margin-top: 1rem; }
+  button {
+    display: block; width: 100%;
+    min-height: 3.25rem; margin-bottom: 0.75rem;
+    font-family: inherit; font-size: 1.1rem; font-weight: 700;
+    border: 2px solid var(--schwarz); border-radius: 0.5rem;
+    background: var(--gelb); color: var(--schwarz);
+    cursor: pointer; touch-action: manipulation;
+  }
+  button.secondary { background: var(--weiss); }
+  button:disabled { opacity: 0.5; }
+  .result-value { font-size: 1.6rem; font-weight: 700; margin: 0.25rem 0 0.75rem;
+                  color: var(--orange); }
+  .status { margin-top: 1rem; font-size: 0.9rem; color: var(--grau-dk); }
+  .error { color: #a4262c; }
+</style>
+</head>
+<body>
+<img class="brand" src="/static/assets/fom-rgb.svg" alt="FAKT-O-MAT">
+
+<!-- Screen 1: Datenschutzhinweis (UEBERGABE 7.4) -->
+<section id="screen-privacy" class="screen active">
+  <h1>Faktomat Live</h1>
+  <p>Gleich siehst du 24 Aussagen und entscheidest jeweils: <strong>wahr oder falsch?</strong></p>
+  <p><strong>Was mit deinen Antworten passiert:</strong> Dein Gerät berechnet daraus
+  zwei zusammengefasste Kennwerte (Unterscheidungsfähigkeit und Antwort-Asymmetrie).
+  <strong>Nur diese zwei Zahlen</strong> werden übertragen — deine einzelnen Antworten
+  verlassen dein Gerät nie.</p>
+  <p><strong>Es wird nichts gespeichert:</strong> keine Cookies, kein Konto, keine
+  Daten nach Ende der Veranstaltung. Die Projektion zeigt ausschließlich
+  Gruppenverteilungen, nie Einzelergebnisse.</p>
+  <button id="btn-start">Verstanden, starten</button>
+  <p class="muted" id="privacy-status"></p>
+</section>
+
+<!-- Screen 2: Item-Schleife -->
+<section id="screen-items" class="screen">
+  <p class="progress" id="progress"></p>
+  <p class="claim" id="claim"></p>
+  <button id="btn-true">Wahr</button>
+  <button id="btn-false" class="secondary">Falsch</button>
+</section>
+
+<!-- Screen 3: privates Feedback (nur auf diesem Gerät, UEBERGABE 6) -->
+<section id="screen-result" class="screen">
+  <h1>Dein Ergebnis</h1>
+  <p class="muted">Bleibt privat auf deinem Gerät — auf der Leinwand erscheinen nur
+  Gruppenverteilungen.</p>
+  <p style="margin-top:1rem"><strong>Unterscheidungsfähigkeit d′</strong></p>
+  <p class="result-value" id="result-d"></p>
+  <p class="muted">Wie gut du wahre von falschen Aussagen getrennt hast
+  (0 = Raten, höher = besser).</p>
+  <p style="margin-top:1rem"><strong>Asymmetrie b′</strong></p>
+  <p class="result-value" id="result-b"></p>
+  <p class="muted">Ob deine Genauigkeit davon abhing, welche politische Richtung die
+  korrekte Antwort stützt (positiv = genauer bei rechts-kongruenten, negativ = genauer
+  bei links-kongruenten Aussagen, nahe 0 = keine Asymmetrie). Das ist keine allgemeine
+  Ja-Sage-Tendenz, sondern ein Asymmetrie-Index der Genauigkeit.</p>
+  <p class="status" id="submit-status"></p>
+</section>
+
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>

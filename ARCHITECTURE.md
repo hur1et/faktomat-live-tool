@@ -77,8 +77,11 @@ Arbeitsplan UEBERGABE 9:
 - [x] **Schritt 1** — Scoring portiert, Python- + JS-Tests grün gegen die Vektoren (4.5).
 - [x] **Schritt 2** — Server: Session-Lifecycle, Item-Auslieferung, Submit-Validierung, SSE,
       Reveal + Aggregation (Binning, n<3-Merge, Gate ≥15). 31 Tests grün, läuft real mit `items.json`.
-- [ ] Schritt 3 — Teilnehmer-View (mobile-first, Retry-Queue, privates Feedback).
-- [ ] Schritt 4 — Host-View (Fortschritt, 3 Reveal-Stufen, Binning/Merge, Overlay-Flag, Demo-Modus).
+- [x] **Schritt 3** — Teilnehmer-View: join.html + app.js + submit-queue.js (Retry/Backoff).
+      Browser-Test auf echten Geräten steht aus (Generalprobe).
+- [x] **Schritt 4** — Host-View: SSE-Fortschritt, 3 Reveal-Stufen, serverseitige KDE,
+      Benchmark-Overlay (Flag `FAKTOMAT_BENCHMARK`), Demo-Modus, SVG statt D3 (keine
+      externe Abhängigkeit am Eventtag; KDE kommt fertig vom Server). MODERATION.md.
 - [ ] Schritt 5 — Lasttest, Datenschutz-Review, Deployment, Generalprobe.
 
 ## Offene Abhängigkeiten (blockieren Inhalt, nicht Bau)
