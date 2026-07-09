@@ -1,5 +1,5 @@
 """
-Benchmark-Berechnung für das Reveal-Overlay — Faktomat Live.
+Benchmark-Berechnung für das Reveal-Overlay – Faktomat Live.
 
 Rechnet aus den Rohdaten der IBE-2.4-Erhebung (meta-d-pipeline-Projekt) die
 d'/b'-Verteilungen und schreibt sie als reines Aggregat (benchmark.json,
@@ -8,7 +8,7 @@ sieht ausschließlich Bin-Kanten und Dichten.
 
 Zentrale Entscheidungen:
   - Nur Completes (dispcode 31/32), complete-case: Personen mit irgendeiner
-    fehlenden IBE-Antwort (Sentinels -77/-99/-66 o.ä.) werden ausgeschlossen —
+    fehlenden IBE-Antwort (Sentinels -77/-99/-66 o.ä.) werden ausgeschlossen –
     imputierte Raten würden d'/b' verzerren.
   - Scoring identisch zum Live-Tool: scoring_reference.compute_scores mit
     Hautus-Korrektur. Nur so ist das Overlay mit der Raumverteilung vergleichbar.
@@ -17,7 +17,7 @@ Zentrale Entscheidungen:
     liegt in dataset2_IBE24.csv; die Live-IDs IBE11/12/17/18 heißen im
     Datensatz AddIBE1/4/8/11.
   - Antwortkodierung: 1 = "wahr" geantwortet, 2 = "falsch" geantwortet.
-  - Repräsentativität der 2.4-Stichprobe ist NICHT bestätigt — das Event-Framing
+  - Repräsentativität der 2.4-Stichprobe ist NICHT bestätigt – das Event-Framing
     ("… von Deutschland?") erst nach Klärung mit Stolp verwenden. Der
     source-String im Output benennt das explizit.
 
@@ -48,7 +48,7 @@ def load_key(path: Path) -> list[dict]:
     raw = json.loads(path.read_text(encoding="utf-8"))
     items = raw["items"]
     if len(items) != 24 or any(i.get("status") != "verified" for i in items):
-        raise ValueError("Truth-Key unvollständig oder nicht verifiziert — Abbruch.")
+        raise ValueError("Truth-Key unvollständig oder nicht verifiziert – Abbruch.")
     return items
 
 
@@ -94,7 +94,7 @@ def quantiles(values: list[float]) -> dict:
     """
     Perzentile p1–p99 (lineare Interpolation). Erlaubt dem Host-View flexible
     Darstellungen (KDE-artige Kurve, Kategorien-Schnitte wie im Original-
-    Faktomat, 'Du'-Einordnung), ohne je Einzelwerte auszuliefern — 99
+    Faktomat, 'Du'-Einordnung), ohne je Einzelwerte auszuliefern – 99
     Quantile aus N>1500 sind ein reines Aggregat.
     """
     s = sorted(values)
@@ -156,7 +156,7 @@ def main() -> None:
             f"N={n} von {n_complete} Completes (complete-case, {n_excluded} "
             f"mit fehlenden IBE-Antworten ausgeschlossen). Scoring: Hautus-"
             f"Korrektur, identisch zum Live-Tool. ACHTUNG: Repräsentativität "
-            f"nicht bestätigt — Event-Framing vor Nutzung mit Stolp klären."
+            f"nicht bestätigt – Event-Framing vor Nutzung mit Stolp klären."
         ),
         "d_prime": {**make_histogram(d_values, args.bins),
                     "quantiles": quantiles(d_values), "summary": summarize(d_values)},

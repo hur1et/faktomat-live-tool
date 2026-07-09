@@ -1,9 +1,9 @@
 """
-Session-Store — Faktomat Live.
+Session-Store – Faktomat Live.
 
 Hält den gesamten Zustand im RAM (UEBERGABE 3): ein Session-Objekt pro Event,
 in einem Dict nach Code. Kein DB, keine Dateien, keine Logs mit Nutzdaten.
-Prozess-Ende = Daten weg (Feature, kein Mangel — UEBERGABE 7).
+Prozess-Ende = Daten weg (Feature, kein Mangel – UEBERGABE 7).
 
 Gespeichert pro Session wird ausschließlich:
   - die eingegangenen Kennwertepaare {d_prime, b_prime} (geclampt),
@@ -43,7 +43,7 @@ class Session:
     # Teilnahme-Tokens, die schon abgegeben haben (Ein-Submit-Regel).
     submitted_tokens: set[str] = field(default_factory=set)
     reveal_stage: int = 0
-    # Reiner Zähler für die Host-Anzeige "X von Y" — keine Personendaten.
+    # Reiner Zähler für die Host-Anzeige "X von Y" – keine Personendaten.
     joined: int = 0
 
     @property

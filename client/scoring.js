@@ -1,5 +1,5 @@
 /**
- * IBE-Scoring — Faktomat Live (Client-seitige Implementierung).
+ * IBE-Scoring – Faktomat Live (Client-seitige Implementierung).
  *
  * 1:1-Port von scoring/scoring_reference.py. Die Referenz ist die
  * verbindliche "Source of Truth" (UEBERGABE Abschnitt 4). Diese Datei

@@ -1,18 +1,18 @@
 """
-Aggregation der Kennwerte für den Host-View — Faktomat Live.
+Aggregation der Kennwerte für den Host-View – Faktomat Live.
 
 Erzeugt gebinnte Verteilungen von d′ und b′ unter den verbindlichen
 Anonymitätsregeln aus UEBERGABE Abschnitt 6:
 
   - Keine Einzelpunkte. Nur Histogramm (5–6 Bins) oder KDE.
   - Bins mit n < 3 werden mit einem Nachbarn verschmolzen (bei b′ nicht
-    verhandelbar, bei d′ ebenso angewandt) — b′ ist ein Proxy für politische
+    verhandelbar, bei d′ ebenso angewandt) – b′ ist ein Proxy für politische
     Orientierung (Nähe zu DSGVO Art. 9).
   - Reveal erst ab MIN_PARTICIPANTS_FOR_REVEAL Teilnahmen (Gate im Store).
   - Kein Leaderboard, kein "besser als X %". Höchstens ein Median-Marker in
     Stufe 3, immer IM Verteilungskontext (nie als nackte Einzelzahl).
 
-Reine Funktionen, keine Server-Abhängigkeit — dadurch isoliert testbar.
+Reine Funktionen, keine Server-Abhängigkeit – dadurch isoliert testbar.
 """
 
 from __future__ import annotations
@@ -133,7 +133,7 @@ def kde(values: list[float], n_grid: int = 100) -> dict:
     """
     Gauß-KDE auf einem festen Gitter (UEBERGABE 6, Stufe 2).
 
-    Läuft serverseitig, weil sie die Rohwerte braucht — ausgeliefert werden
+    Läuft serverseitig, weil sie die Rohwerte braucht – ausgeliefert werden
     nur die Gitterpunkte {x, density}. Gitter: [min-3h, max+3h], damit die
     Kurve sauber auf null ausläuft.
     """
@@ -166,7 +166,8 @@ def _median(values: list[float]) -> float:
     return s[mid] if n % 2 else (s[mid - 1] + s[mid]) / 2.0
 
 
-def aggregate_scores(scores: list[tuple[float, float]], stage: int) -> dict:
+def aggregate_scores(scores: list[tuple[float, float]], stage: int,
+                     enforce_gate: bool = True) -> dict:
     """
     Baut die gebinnten Verteilungen für eine Reveal-Stufe.
 
@@ -177,12 +178,17 @@ def aggregate_scores(scores: list[tuple[float, float]], stage: int) -> dict:
     Gibt ein anonymitäts-gefiltertes Dict zurück. Solange das Gate nicht
     erreicht ist, werden KEINE Verteilungsdaten geliefert (nur der Zählerstand),
     damit ein zu früher /aggregate-Aufruf nichts durchsickern lässt.
+
+    enforce_gate=False überspringt NUR das Teilnahme-Gate (Testmodus mit
+    1-3 Geräten; die App erlaubt das ausschließlich hinter FAKTOMAT_DEV=1).
+    Bei so kleinen n sind Bins praktisch Einzelwerte - deshalb niemals im
+    Produktivbetrieb.
     """
     n = len(scores)
     result: dict = {"submitted": n, "reveal_stage": stage,
                     "gate": MIN_PARTICIPANTS_FOR_REVEAL, "gate_open": n >= MIN_PARTICIPANTS_FOR_REVEAL}
 
-    if n < MIN_PARTICIPANTS_FOR_REVEAL or stage < 1:
+    if (enforce_gate and n < MIN_PARTICIPANTS_FOR_REVEAL) or stage < 1 or n == 0:
         return result
 
     d_values = [d for d, _ in scores]
@@ -194,7 +200,7 @@ def aggregate_scores(scores: list[tuple[float, float]], stage: int) -> dict:
         # Bins fürs Fallback, KDE für die Overlay-Kurve (UEBERGABE 6, Stufe 2).
         result["b_prime"] = {"bins": _binned(b_values), "kde": kde(b_values)}
     if stage >= 3:
-        # Median IM Verteilungskontext (UEBERGABE 6, Stufe 3) — nie als
+        # Median IM Verteilungskontext (UEBERGABE 6, Stufe 3) – nie als
         # nackte Einzelzahl ohne die b′-Bins darüber.
         result["b_prime"]["room_median"] = round(_median(b_values), 4)
 

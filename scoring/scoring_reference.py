@@ -1,8 +1,8 @@
 """
-IBE scoring reference implementation — Faktomat Live.
+IBE scoring reference implementation – Faktomat Live.
 
 Source of truth for d' and b' as defined in:
-Stolp, Finn, Ziemer, Thiel & Rothmund — "Ideologically Biased Evaluation
+Stolp, Finn, Ziemer, Thiel & Rothmund – "Ideologically Biased Evaluation
 of Evidence: A Signal-Detection Approach to Measure Individual Differences".
 
     d' = z(hit_rate) - z(false_alarm_rate)
@@ -137,7 +137,7 @@ def compute_scores(responses: Iterable[ItemResponse],
 
 
 # ---------------------------------------------------------------------------
-# Test vectors — binding acceptance criteria for any port (JS client!).
+# Test vectors – binding acceptance criteria for any port (JS client!).
 # Run: python scoring_reference.py
 # ---------------------------------------------------------------------------
 
@@ -197,7 +197,7 @@ def _run_tests() -> None:
     assert abs(s4.b_prime + s2.b_prime) < tol_exact, (s2, s4)
 
     # Production path on the paper's participants (corrected values differ
-    # slightly from Box 1 — expected, since Box 1 is uncorrected).
+    # slightly from Box 1 – expected, since Box 1 is uncorrected).
     s1c = compute_scores(p1, edge_correction=True)
     assert abs(s1c.b_prime) < tol_exact  # symmetry preserved under correction
 

@@ -1,5 +1,5 @@
 """
-Tests für den Server-Kern — Faktomat Live (Schritt 2).
+Tests für den Server-Kern – Faktomat Live (Schritt 2).
 
 Deckt ab:
   - Item-Validierung (gültig + jede Balance-/Schema-Verletzung),
@@ -244,6 +244,62 @@ def test_benchmark_attached_at_stage2(monkeypatch, tmp_path):
                 headers={"X-Host-Token": host_token}).json()
     assert agg["benchmark"]["source"] == "test"
     assert "kde" in agg["b_prime"]
+
+
+# --- Testmodus (?nogate=1, nur mit FAKTOMAT_DEV) -----------------------------
+
+def test_nogate_forbidden_without_dev_flag(client, monkeypatch):
+    monkeypatch.delenv("FAKTOMAT_DEV", raising=False)
+    code, host_token = _new_session(client)
+    r = client.get(f"/api/session/{code}/aggregate?nogate=1",
+                   headers={"X-Host-Token": host_token})
+    assert r.status_code == 403
+
+
+def test_nogate_returns_data_below_gate_with_dev_flag(client, monkeypatch):
+    monkeypatch.setenv("FAKTOMAT_DEV", "1")
+    code, host_token = _new_session(client)
+    for _ in range(2):  # nur 2 Testgeräte, weit unter dem Gate
+        t = client.post(f"/api/session/{code}/join").json()["participant_token"]
+        client.post(f"/api/session/{code}/submit",
+                    json={"participant_token": t, "d_prime": 0.5, "b_prime": 0.1})
+    r = client.get(f"/api/session/{code}/aggregate?nogate=1",
+                   headers={"X-Host-Token": host_token})
+    body = r.json()
+    assert body["ungated"] is True
+    assert body["submitted"] == 2
+    assert "d_prime" in body and "kde" in body["b_prime"]
+    # Normaler Abruf bleibt trotz Dev-Flag gegated:
+    normal = client.get(f"/api/session/{code}/aggregate",
+                        headers={"X-Host-Token": host_token}).json()
+    assert "d_prime" not in normal
+
+
+# --- QR-Code (Host-Lobby) ----------------------------------------------------
+
+def test_qr_svg_served(client):
+    code, _ = _new_session(client)
+    r = client.get(f"/api/session/{code}/qr.svg")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("image/svg")
+    assert b"<svg" in r.content
+
+
+def test_qr_unknown_session_404(client):
+    assert client.get("/api/session/deadbeef/qr.svg").status_code == 404
+
+
+def test_qr_respects_forwarded_host(client):
+    # Hinterm Reverse Proxy muss die öffentliche Adresse in den QR, nicht
+    # localhost – unterschiedliche Hosts ergeben unterschiedliche Codes.
+    code, _ = _new_session(client)
+    a = client.get(f"/api/session/{code}/qr.svg",
+                   headers={"X-Forwarded-Host": "faktomat.uni-jena.de",
+                            "X-Forwarded-Proto": "https"}).content
+    b = client.get(f"/api/session/{code}/qr.svg",
+                   headers={"X-Forwarded-Host": "example.org",
+                            "X-Forwarded-Proto": "https"}).content
+    assert a != b
 
 
 # --- Teilnehmer-View (statische Auslieferung) -------------------------------

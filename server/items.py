@@ -1,9 +1,9 @@
 """
-Item-Loader und -Validator — Faktomat Live.
+Item-Loader und -Validator – Faktomat Live.
 
 Lädt die Itemliste (items.json) beim Serverstart und prüft sie gegen das
 in UEBERGABE Abschnitt 5 festgelegte Schema. Verstöße führen zum sofortigen
-Startabbruch mit klarer Fehlermeldung (fail-loud) — ein Live-Event darf nicht
+Startabbruch mit klarer Fehlermeldung (fail-loud) – ein Live-Event darf nicht
 mit stillschweigend falschen Items starten.
 
 Design-Constraints (Ground Truth = items.json, Codebook Interventionsstudie):
@@ -13,7 +13,7 @@ Design-Constraints (Ground Truth = items.json, Codebook Interventionsstudie):
   - jedes Item: id, text, truth_value(bool), task(left|right), domain(str).
 
 Hinweis: Das Übergabedokument sprach ursprünglich von 6/6-Balance je Zelle
-(task × truth_value). Die reale Itemliste ist 14 wahr / 10 falsch — das ist die
+(task × truth_value). Die reale Itemliste ist 14 wahr / 10 falsch – das ist die
 akzeptierte Ground Truth. Der Validator erzwingt daher NICHT mehr 6/6, sondern
 nur die für das Scoring notwendigen Bedingungen (12/Task, beide truth_values je
 Task). Das Scoring selbst zählt die Zellen ohnehin dynamisch, nicht hart auf 12.
@@ -33,7 +33,7 @@ from typing import Literal
 Task = Literal["left", "right"]
 
 # Erwartete Struktur (Ground Truth): 24 Items, 12/Task.
-# KEINE feste Zellbalance mehr — die reale Liste ist 14 wahr / 10 falsch.
+# KEINE feste Zellbalance mehr – die reale Liste ist 14 wahr / 10 falsch.
 EXPECTED_TOTAL = 24
 EXPECTED_PER_TASK = 12
 
@@ -100,7 +100,7 @@ def validate_items(items: list[Item]) -> None:
 
     Erzwungen: 24 Items, eindeutige IDs, 12 je Task, und je Task beide
     truth_values vorhanden. NICHT erzwungen: 6/6-Zellbalance (die reale Liste
-    ist 14 wahr / 10 falsch — akzeptierte Ground Truth).
+    ist 14 wahr / 10 falsch – akzeptierte Ground Truth).
 
     Wirft ItemValidationError bei jedem Verstoß.
     """
@@ -123,7 +123,7 @@ def validate_items(items: list[Item]) -> None:
     for task in ("left", "right"):
         for truth in (True, False):
             _require(per_cell[(task, truth)] >= 1,
-                     f"Zelle task={task}, truth_value={truth} ist leer — "
+                     f"Zelle task={task}, truth_value={truth} ist leer – "
                      f"d′/b′ nicht berechenbar.")
 
 

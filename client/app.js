@@ -1,5 +1,5 @@
 /**
- * Teilnehmer-Ablauf — Faktomat Live (UEBERGABE Abschnitt 3, Komponente 1).
+ * Teilnehmer-Ablauf – Faktomat Live (UEBERGABE Abschnitt 3, Komponente 1).
  *
  * Join -> Items laden -> clientseitig randomisieren (Fisher-Yates) ->
  * 24 Antworten einsammeln -> Scoring LOKAL (scoring.js) -> nur {d', b'}
@@ -34,7 +34,7 @@ function shuffle(arr) {
 
 let items = [];
 let index = 0;
-const responses = []; // {truthValue, task, answeredTrue} — verlässt die Seite nie
+const responses = []; // {truthValue, task, answeredTrue} – verlässt die Seite nie
 
 async function start() {
   $("btn-start").disabled = true;
@@ -96,7 +96,7 @@ async function finish() {
       b_prime: bPrime,
     }, {
       onRetry: (attempt, max) => {
-        status.textContent = `Netz wackelt — Versuch ${attempt + 1} von ${max} …`;
+        status.textContent = `Netz wackelt – Versuch ${attempt + 1} von ${max} …`;
       },
     });
     if (resp.ok) {
@@ -109,7 +109,7 @@ async function finish() {
     }
   } catch {
     status.textContent =
-      "Übertragung nicht möglich — dein Ergebnis oben gilt trotzdem. " +
+      "Übertragung nicht möglich – dein Ergebnis oben gilt trotzdem. " +
       "Es fließt nur nicht in die Raumgrafik ein.";
     status.classList.add("error");
   }

@@ -1,30 +1,30 @@
-# Moderations-Briefing — Faktomat Live
+# Moderations-Briefing – Faktomat Live
 
 Nach UEBERGABE Abschnitt 6. Vor dem Event mit der Panelistin durchgehen:
 sie muss wissen, welche drei Grafiken kommen und was sie zeigen können.
 
-## Die drei Reveal-Stufen (immer manuell auslösen — der Reveal ist Dramaturgie)
+## Die drei Reveal-Stufen (immer manuell auslösen – der Reveal ist Dramaturgie)
 
-1. **Stufe 1 — d′ des Raums.** Unverfänglicher Einstieg: „Wie gut unterscheidet
+1. **Stufe 1 – d′ des Raums.** Unverfänglicher Einstieg: „Wie gut unterscheidet
    dieser Raum wahr von falsch?" Zur Einordnung: In der Vergleichserhebung
-   (N≈1.500) lag der Mittelwert bei d′ ≈ 0.45 — die Items sind schwer, auch
+   (N≈1.500) lag der Mittelwert bei d′ ≈ 0.45 – die Items sind schwer, auch
    für aufmerksame Menschen. Das entlastet und nimmt Prüfungsangst.
-2. **Stufe 2 — b′ mit Vergleichsverteilung.** Frame IMMER: „Wie unterscheidet
-   sich dieser Raum von der Vergleichsstichprobe?" — NICHT „Sind wir biased?".
+2. **Stufe 2 – b′ mit Vergleichsverteilung.** Frame IMMER: „Wie unterscheidet
+   sich dieser Raum von der Vergleichsstichprobe?" – NICHT „Sind wir biased?".
    ⚠️ Solange die Repräsentativität der 2.4-Stichprobe nicht bestätigt ist,
    nicht „von Deutschland" sagen.
-3. **Stufe 3 — Raum-Median als Marker in der Verteilung.** NIE als nackte
+3. **Stufe 3 – Raum-Median als Marker in der Verteilung.** NIE als nackte
    Einzelzahl kommunizieren. Ein Median nahe 0 kann Bias-**Auslöschung** bei
-   gemischtem Publikum bedeuten (linke und rechte Asymmetrien heben sich auf) —
+   gemischtem Publikum bedeuten (linke und rechte Asymmetrien heben sich auf) –
    das ist ein Gesprächsanlass, keine Entwarnung.
 
-## Das wahrscheinliche Ergebnis — Frame VORHER setzen
+## Das wahrscheinliche Ergebnis – Frame VORHER setzen
 
 Bei selbstselektiertem zivilgesellschaftlichem Publikum ist ein Raum-b′
 **links von null** zu erwarten. Die Moderation setzt den Frame, bevor das
 Publikum ihn setzt:
 
-> „Voreingenommenheit betrifft nicht nur die anderen — das Instrument zeigt
+> „Voreingenommenheit betrifft nicht nur die anderen – das Instrument zeigt
 > sie in beide Richtungen, und dieser Raum ist keine Ausnahme."
 
 ## Sprachregelung b′ (verbindlich, aus dem Paper)
@@ -44,6 +44,6 @@ eigenen Gerät.
 ## Wenn die Technik ausfällt
 
 Host-View hat einen **Demo-Modus** (Button oben rechts, gelber Banner,
-synthetische Daten) — damit lässt sich die Dramaturgie auch bei Totalausfall
+synthetische Daten) – damit lässt sich die Dramaturgie auch bei Totalausfall
 der Teilnehmergeräte zeigen. Zusätzlich analoge Variante bereithalten
 (Aufstellung im Raum entlang einer Achse).

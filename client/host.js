@@ -1,5 +1,5 @@
 /**
- * Host-View — Faktomat Live (UEBERGABE 3 Komponente 2, Abschnitt 6).
+ * Host-View – Faktomat Live (UEBERGABE 3 Komponente 2, Abschnitt 6).
  *
  * Fortschritt über SSE, drei MANUELL ausgelöste Reveal-Stufen, Charts als
  * handgerolltes SVG (bewusst kein D3: keine externe Abhängigkeit am
@@ -7,7 +7,7 @@
  * nur Balken und ein Pfad).
  *
  * Anonymität: dieser Client erhält ausschließlich Aggregate (gemergte Bins,
- * KDE-Gitter, Median) — nie Einzelwerte. Balkenhöhen sind DICHTEN
+ * KDE-Gitter, Median) – nie Einzelwerte. Balkenhöhen sind DICHTEN
  * (count/Breite), weil Bins nach dem n<3-Merge ungleich breit sind.
  *
  * Demo-Modus (UEBERGABE 8): rein clientseitig erzeugte synthetische Daten,
@@ -31,9 +31,11 @@ source.onmessage = (ev) => {
   const d = JSON.parse(ev.data);
   $("progress").innerHTML =
     `${d.submitted} <small>abgeschlossen</small> / ${d.joined} <small>beigetreten</small>`;
+  $("lobby-counter").innerHTML =
+    `<strong>${d.joined}</strong> beigetreten · <strong>${d.submitted}</strong> abgeschlossen`;
   updateGate(d.submitted);
 };
-source.onerror = () => { $("status").textContent = "Verbindung zum Server unterbrochen — SSE reconnectet …"; };
+source.onerror = () => { $("status").textContent = "Verbindung zum Server unterbrochen – SSE reconnectet …"; };
 
 function updateGate(submitted) {
   const open = submitted >= GATE;
@@ -42,6 +44,15 @@ function updateGate(submitted) {
     ? "" : `Reveal gesperrt: erst ab ${GATE} Teilnahmen (aktuell ${submitted}).`;
 }
 updateGate(0);
+
+// --- Lobby (QR-Einstieg) -----------------------------------------------------
+
+$("qr").src = api("qr.svg");
+$("join-url").textContent = `${window.location.host}/join/${code}`;
+$("to-stages").addEventListener("click", () => {
+  $("lobby").style.display = "none";
+  $("main-view").style.display = "block";
+});
 
 // --- Reveal-Stufen -----------------------------------------------------------
 
@@ -88,6 +99,9 @@ function el(name, attrs) {
 
 /** Skalen + Achse; gibt x()/y()-Abbildungen in Pixelkoordinaten zurück. */
 function scales(svg, xMin, xMax, yMax) {
+  // Degenerierte Spannen (z.B. 1 Testgerät -> ein Bin mit lo==hi) abfangen.
+  if (xMax - xMin <= 0) { xMin -= 0.5; xMax += 0.5; }
+  if (yMax <= 0) yMax = 1;
   const x = (v) => PAD.l + ((v - xMin) / (xMax - xMin)) * (W - PAD.l - PAD.r);
   const y = (v) => H - PAD.b - (v / yMax) * (H - PAD.t - PAD.b);
   svg.appendChild(el("line", { x1: PAD.l, y1: H - PAD.b, x2: W - PAD.r, y2: H - PAD.b,
@@ -101,10 +115,11 @@ function scales(svg, xMin, xMax, yMax) {
   return { x, y };
 }
 
-/** Dichte je Bin: count / (n * Breite) — vergleichbar trotz Merge-Bins. */
+/** Dichte je Bin: count / (n * Breite) – vergleichbar trotz Merge-Bins. */
 function binDensities(bins) {
   const n = bins.reduce((acc, b) => acc + b.count, 0);
-  return bins.map((b) => ({ ...b, density: b.count / (n * (b.hi - b.lo)) }));
+  // Breite 0 (alle Werte identisch, z.B. 1 Testgerät) -> Anzeigebreite 1.
+  return bins.map((b) => ({ ...b, density: b.count / (n * ((b.hi - b.lo) || 1)) }));
 }
 
 function drawBins(svg, sc, bins, fill, opacity = 1) {
@@ -159,7 +174,7 @@ function render(stage, agg) {
     ? "Wie unterscheidet sich dieser Raum von der Vergleichsstichprobe?"
     : "Antwort-Asymmetrie b′ in diesem Raum";
   $("legend").textContent =
-    "b′: Asymmetrie der Genauigkeit (links- vs. rechts-kongruente Aussagen) — " +
+    "b′: Asymmetrie der Genauigkeit (links- vs. rechts-kongruente Aussagen) – " +
     "keine Ja-Sage-Tendenz. Grau: Vergleichsstichprobe, Orange: dieser Raum." +
     (stage >= 3 ? " Marker: Median des Raums." : "");
 
@@ -225,6 +240,23 @@ function demoAggregate() {
   };
 }
 
-function renderDemo(stage) {
+async function renderDemo(stage) {
+  // Erst echte Testdaten versuchen (Gate umgangen; Server erlaubt das nur
+  // als Dev-Instanz mit FAKTOMAT_DEV=1). So sieht man mit 1-3 Testgeräten
+  // den kompletten echten Datenpfad in der Grafik. Sonst: synthetisch.
+  try {
+    const r = await fetch(api("aggregate?nogate=1"), { headers: authHeaders });
+    if (r.ok) {
+      const agg = await r.json();
+      if (agg.ungated && agg.submitted > 0) {
+        $("demo-banner").textContent =
+          `TESTMODUS - ${agg.submitted} echte Teilnahme(n), Anonymitäts-Gate umgangen. ` +
+          "Nie im Produktivbetrieb verwenden.";
+        render(Math.min(stage, 3), agg);
+        return;
+      }
+    }
+  } catch { /* Server nicht erreichbar -> synthetischer Fallback */ }
+  $("demo-banner").textContent = "DEMO-MODUS - synthetische Daten, keine echten Teilnahmen";
   render(stage, demoAggregate());
 }

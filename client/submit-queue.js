@@ -1,11 +1,11 @@
 /**
- * Submit mit Retry-Queue — Faktomat Live (UEBERGABE Abschnitt 3).
+ * Submit mit Retry-Queue – Faktomat Live (UEBERGABE Abschnitt 3).
  *
  * Teilnehmende hängen am Mobilfunk; ein Submit darf an einem Funkloch nicht
  * scheitern. Strategie: exponentieller Backoff (1s, 2s, 4s, 8s), maximal
  * 5 Versuche, UI-Hinweis über onRetry-Callback.
  *
- * Wichtige Abgrenzung: 4xx-Antworten werden NICHT wiederholt — ein 409
+ * Wichtige Abgrenzung: 4xx-Antworten werden NICHT wiederholt – ein 409
  * (doppelter Submit) oder 400 (kaputte Payload) wird durch Wiederholen nicht
  * besser. Nur Netzfehler und 5xx gelten als transient.
  *

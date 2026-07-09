@@ -7,7 +7,7 @@
 <style>
   /* Mobile-first, daumentauglich (UEBERGABE 8). CD FAKT-O-MAT (Kallinich):
      Gelb #f2e61a, Orange #ef7d00, Schwarz #1a1a1a, Grau #f4f4f2, Montserrat.
-     Webfont hier BEWUSST nicht geladen (745 KB, Mobilfunk) — Fallback-Stack.
+     Webfont hier BEWUSST nicht geladen (745 KB, Mobilfunk) – Fallback-Stack.
      Farbwerte aus faktomat_flyer (rollup_faktomat_FINAL.html). */
   :root {
     --gelb: #f2e61a; --orange: #ef7d00; --schwarz: #1a1a1a;
@@ -44,6 +44,10 @@
   }
   button.secondary { background: var(--weiss); }
   button:disabled { opacity: 0.5; }
+  /* Antwort-Buttons: beide WEISS und gleichrangig nebeneinander. Keine
+     Farbe darf eine Antwort nahelegen (Suggestions-Bias im Instrument). */
+  .answers { display: flex; gap: 0.75rem; }
+  .answers button { background: var(--weiss); flex: 1; }
   .result-value { font-size: 1.6rem; font-weight: 700; margin: 0.25rem 0 0.75rem;
                   color: var(--orange); }
   .status { margin-top: 1rem; font-size: 0.9rem; color: var(--grau-dk); }
@@ -59,7 +63,7 @@
   <p>Gleich siehst du 24 Aussagen und entscheidest jeweils: <strong>wahr oder falsch?</strong></p>
   <p><strong>Was mit deinen Antworten passiert:</strong> Dein Gerät berechnet daraus
   zwei zusammengefasste Kennwerte (Unterscheidungsfähigkeit und Antwort-Asymmetrie).
-  <strong>Nur diese zwei Zahlen</strong> werden übertragen — deine einzelnen Antworten
+  <strong>Nur diese zwei Zahlen</strong> werden übertragen – deine einzelnen Antworten
   verlassen dein Gerät nie.</p>
   <p><strong>Es wird nichts gespeichert:</strong> keine Cookies, kein Konto, keine
   Daten nach Ende der Veranstaltung. Die Projektion zeigt ausschließlich
@@ -72,14 +76,16 @@
 <section id="screen-items" class="screen">
   <p class="progress" id="progress"></p>
   <p class="claim" id="claim"></p>
-  <button id="btn-true">Wahr</button>
-  <button id="btn-false" class="secondary">Falsch</button>
+  <div class="answers">
+    <button id="btn-true">Wahr</button>
+    <button id="btn-false">Falsch</button>
+  </div>
 </section>
 
 <!-- Screen 3: privates Feedback (nur auf diesem Gerät, UEBERGABE 6) -->
 <section id="screen-result" class="screen">
   <h1>Dein Ergebnis</h1>
-  <p class="muted">Bleibt privat auf deinem Gerät — auf der Leinwand erscheinen nur
+  <p class="muted">Bleibt privat auf deinem Gerät – auf der Leinwand erscheinen nur
   Gruppenverteilungen.</p>
   <p style="margin-top:1rem"><strong>Unterscheidungsfähigkeit d′</strong></p>
   <p class="result-value" id="result-d"></p>

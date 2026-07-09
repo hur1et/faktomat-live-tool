@@ -1,4 +1,4 @@
-# ARCHITECTURE — Faktomat Live
+# ARCHITECTURE – Faktomat Live
 
 Verbindliche Referenz für Datenfluss und Entscheidungen. Ergänzt das
 Übergabedokument [`UEBERGABE_faktomat-live.md`](UEBERGABE_faktomat-live.md),
@@ -18,7 +18,7 @@ Der zentrale Entwurfszwang (UEBERGABE 7): **Rohantworten verlassen das Endgerät
 Daraus folgt fast alles andere:
 
 - Scoring läuft **clientseitig** (`client/scoring.js`). Übertragen wird nur
-  `{d_prime, b_prime}` — zwei Fließkommazahlen.
+  `{d_prime, b_prime}` – zwei Fließkommazahlen.
 - State liegt **nur im RAM** des Servers (ein Dict pro Session). Kein DB, kein
   Redis, keine Logfiles mit Nutzdaten. Prozess-Ende = Daten weg.
 - Da b′ ein Proxy für politische Orientierung ist (DSGVO Art. 9), gelten strenge
@@ -45,19 +45,19 @@ privates Feedback
 
 | Schicht | Wahl | Verworfene Alternative & Grund |
 |---|---|---|
-| Server | FastAPI + Uvicorn (Python 3.11+) | — |
+| Server | FastAPI + Uvicorn (Python 3.11+) | – |
 | Frontend | Vanilla JS + minimales CSS | React/Vue: zwei Views rechtfertigen kein Framework |
 | Echtzeit | SSE (nur Host-View) | WebSockets: Overkill, fragiler im Event-WLAN |
 | State | RAM-Dict pro Session | DB/Redis/Files: widerspricht "keine Persistenz" (Feature, kein Mangel) |
 | Charts | D3 (Host-View) | Chart.js: weniger Kontrolle über KDE/Overlay |
 | Probit | Acklam-Approximation | erf-basiert: keine Standard-erf in JS-Stdlib |
 
-## Scoring — Source of Truth
+## Scoring – Source of Truth
 
 `scoring/scoring_reference.py` ist die verbindliche Referenz. `client/scoring.js`
 ist ein 1:1-Port und **muss** die Referenzwerte auf den Testvektoren innerhalb
 1e-6 reproduzieren. Randkorrektur: Log-linear (Hautus 1995), einheitlich für alle
-Teilnehmenden — bis Abhängigkeit C (UEBERGABE 2) etwas anderes ergibt.
+Teilnehmenden – bis Abhängigkeit C (UEBERGABE 2) etwas anderes ergibt.
 
 Beide Testsuiten sind Gate: **kein Deployment ohne grüne Scoring-Tests.**
 
@@ -66,7 +66,7 @@ Beide Testsuiten sind Gate: **kein Deployment ohne grüne Scoring-Tests.**
 ```
 scoring/   Python-Referenz + Tests (Source of Truth, dient auch als Server-Validator)
 client/    Vanilla-JS-Client: scoring.js (+ Tests), später Views
-server/    FastAPI-App (noch nicht angelegt — Schritt 2 des Arbeitsplans)
+server/    FastAPI-App (noch nicht angelegt – Schritt 2 des Arbeitsplans)
 deploy/    systemd-Unit, Proxy-Snippets (noch nicht angelegt)
 ```
 
@@ -74,15 +74,15 @@ deploy/    systemd-Unit, Proxy-Snippets (noch nicht angelegt)
 
 Arbeitsplan UEBERGABE 9:
 
-- [x] **Schritt 1** — Scoring portiert, Python- + JS-Tests grün gegen die Vektoren (4.5).
-- [x] **Schritt 2** — Server: Session-Lifecycle, Item-Auslieferung, Submit-Validierung, SSE,
+- [x] **Schritt 1** – Scoring portiert, Python- + JS-Tests grün gegen die Vektoren (4.5).
+- [x] **Schritt 2** – Server: Session-Lifecycle, Item-Auslieferung, Submit-Validierung, SSE,
       Reveal + Aggregation (Binning, n<3-Merge, Gate ≥15). 31 Tests grün, läuft real mit `items.json`.
-- [x] **Schritt 3** — Teilnehmer-View: join.html + app.js + submit-queue.js (Retry/Backoff).
+- [x] **Schritt 3** – Teilnehmer-View: join.html + app.js + submit-queue.js (Retry/Backoff).
       Browser-Test auf echten Geräten steht aus (Generalprobe).
-- [x] **Schritt 4** — Host-View: SSE-Fortschritt, 3 Reveal-Stufen, serverseitige KDE,
+- [x] **Schritt 4** – Host-View: SSE-Fortschritt, 3 Reveal-Stufen, serverseitige KDE,
       Benchmark-Overlay (Flag `FAKTOMAT_BENCHMARK`), Demo-Modus, SVG statt D3 (keine
       externe Abhängigkeit am Eventtag; KDE kommt fertig vom Server). MODERATION.md.
-- [ ] Schritt 5 — Lasttest, Datenschutz-Review, Deployment, Generalprobe.
+- [ ] Schritt 5 – Lasttest, Datenschutz-Review, Deployment, Generalprobe.
 
 ## Offene Abhängigkeiten (blockieren Inhalt, nicht Bau)
 

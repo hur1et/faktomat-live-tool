@@ -1,5 +1,5 @@
 """
-Tests für die Aggregation — Faktomat Live (Binning, n<3-Merge, Gate).
+Tests für die Aggregation – Faktomat Live (Binning, n<3-Merge, Gate).
 
 Deckt die verbindlichen Anonymitätsregeln aus UEBERGABE 6 ab:
   - Binning in feste Bins, Maximalwert fällt ins letzte Bin,

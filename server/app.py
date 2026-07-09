@@ -1,5 +1,5 @@
 """
-FastAPI-App — Faktomat Live (Server-Kern, Schritt 2 des Arbeitsplans).
+FastAPI-App – Faktomat Live (Server-Kern, Schritt 2 des Arbeitsplans).
 
 Endpunkte (UEBERGABE 3):
   POST /api/session                  -> Session anlegen; {code, host_token}
@@ -12,7 +12,7 @@ Endpunkte (UEBERGABE 3):
 
 truth_value im Client: bewusster Trade-off (UEBERGABE 3). Da das Scoring
 clientseitig läuft, kennt der Client die Wahrheitswerte. Rohantworten verlassen
-das Gerät nie — das ist der Datenschutzgewinn. Items werden erst NACH Join
+das Gerät nie – das ist der Datenschutzgewinn. Items werden erst NACH Join
 ausgeliefert, nicht öffentlich verlinkt.
 
 Item-Pfad über Umgebungsvariable FAKTOMAT_ITEMS (Default: items.json neben dieser
@@ -26,8 +26,10 @@ import json
 import os
 from pathlib import Path
 
-from fastapi import Body, FastAPI, Header, HTTPException, Path as PathParam
-from fastapi.responses import FileResponse, StreamingResponse
+import qrcode
+import qrcode.image.svg
+from fastapi import Body, FastAPI, Header, HTTPException, Path as PathParam, Request
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from .aggregate import aggregate_scores
@@ -87,7 +89,7 @@ def _require_host(session, token: str | None) -> None:
 @app.get("/host/{code}")
 def host_page(code: str = PathParam(...)) -> FileResponse:
     """
-    Host-View (Beamer). Die Seite selbst ist ohne Token abrufbar — alle
+    Host-View (Beamer). Die Seite selbst ist ohne Token abrufbar – alle
     Daten-Endpunkte dahinter verlangen das Host-Token, das der Host als
     ?token=... in der URL mitbringt (liest das JS aus).
     """
@@ -95,10 +97,30 @@ def host_page(code: str = PathParam(...)) -> FileResponse:
     return FileResponse(_CLIENT_DIR / "host.html", media_type="text/html")
 
 
+@app.get("/api/session/{code}/qr.svg")
+def qr_svg(request: Request, code: str = PathParam(...)) -> Response:
+    """
+    Session-spezifischer QR-Code (SVG) auf die Join-URL, für die Host-Lobby.
+
+    Die URL wird aus den Request-Headern gebaut: hinter dem Reverse Proxy
+    zählen X-Forwarded-Proto/-Host (UEBERGABE 3a), lokal der Host-Header –
+    so zeigt der QR immer auf die Adresse, unter der die Seite tatsächlich
+    erreichbar ist. Kein Auth: die Join-URL ist zum Projizieren gedacht.
+    """
+    _require_session(code)
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("x-forwarded-host", request.headers.get("host", ""))
+    join_url = f"{scheme}://{host}/join/{code}"
+    img = qrcode.make(join_url, image_factory=qrcode.image.svg.SvgPathImage,
+                      box_size=20, border=2)
+    return Response(content=img.to_string(), media_type="image/svg+xml",
+                    headers={"Cache-Control": "no-store"})
+
+
 @app.get("/join/{code}")
 def join_page(code: str = PathParam(...)) -> FileResponse:
     """
-    Teilnehmer-View. Nur für existierende Sessions (404 sonst) — Items und
+    Teilnehmer-View. Nur für existierende Sessions (404 sonst) – Items und
     truth_values werden nicht öffentlich verlinkt (UEBERGABE 3, Hinweis).
     """
     _require_session(code)
@@ -172,11 +194,11 @@ async def stream(code: str = PathParam(...),
     """
     SSE-Stream für den Host: {joined, submitted, reveal_stage} bei Änderung.
 
-    Auth via X-Host-Token-Header ODER ?token=... — die EventSource-API im
+    Auth via X-Host-Token-Header ODER ?token=... – die EventSource-API im
     Browser kann keine Header setzen, daher der Query-Parameter. Unkritisch,
     weil wir keine Access-Logs führen (UEBERGABE 7.2).
 
-    ?once=1 beendet den Stream nach dem ersten Event — für Tests und für
+    ?once=1 beendet den Stream nach dem ersten Event – für Tests und für
     curl-Diagnose am Eventtag (ein endlicher Response statt Endlosstream).
 
     X-Accel-Buffering: no wird fest gesetzt (UEBERGABE 3a.3): nginx/Apache
@@ -225,6 +247,7 @@ def reveal(code: str = PathParam(...),
 
 @app.get("/api/session/{code}/aggregate")
 def aggregate(code: str = PathParam(...),
+              nogate: bool = False,
               x_host_token: str | None = Header(default=None)) -> dict:
     """
     Gebinnte Verteilungen für den Host-View. Auth via Host-Token.
@@ -235,6 +258,20 @@ def aggregate(code: str = PathParam(...),
     """
     session = _require_session(code)
     _require_host(session, x_host_token)
+
+    if nogate:
+        # Testmodus (1-3 Geräte): Gate umgehen, feste Stufe 3. Nur erlaubt,
+        # wenn der Server ausdrücklich als Dev-Instanz läuft - am Eventtag
+        # fehlt FAKTOMAT_DEV und dieser Pfad ist tot.
+        if not os.environ.get("FAKTOMAT_DEV"):
+            raise HTTPException(status_code=403,
+                                detail="Testmodus nur mit FAKTOMAT_DEV=1 am Server.")
+        result = aggregate_scores(session.scores, stage=3, enforce_gate=False)
+        result["ungated"] = True
+        if BENCHMARK is not None and "b_prime" in result:
+            result["benchmark"] = BENCHMARK
+        return result
+
     result = aggregate_scores(session.scores, session.reveal_stage)
     # Benchmark-Overlay ab Stufe 2, nur wenn die Datei vorhanden ist (Flag).
     if session.reveal_stage >= 2 and result.get("gate_open") and BENCHMARK is not None:

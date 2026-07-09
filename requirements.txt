@@ -1,4 +1,4 @@
-# Faktomat Live — Python-Abhängigkeiten
+# Faktomat Live – Python-Abhängigkeiten
 #
 # Schritt 1 (Scoring-Referenz) nutzt ausschließlich die Standardbibliothek.
 # Python 3.11+ vorausgesetzt (getestet mit 3.12).
@@ -6,6 +6,7 @@
 # Server (Schritt 2):
 fastapi
 uvicorn[standard]
+qrcode        # QR-Code als SVG für die Host-Lobby (pure Python, kein PIL nötig)
 
 # Test:
 httpx          # ASGI-Testclient für FastAPI (TestClient-Backend)
