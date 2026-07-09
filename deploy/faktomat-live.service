@@ -28,9 +28,13 @@ WorkingDirectory=/opt/faktomat-live
 Environment=FAKTOMAT_ITEMS=/opt/faktomat-live/items.json
 # FAKTOMAT_DEV hier NIEMALS setzen: würde das Anonymitäts-Gate umgehbar machen.
 
-# --no-access-log ist Pflicht (DATENSCHUTZ-REVIEW Fund 1): das Access-Log
-# enthielte Client-IPs und das Host-Token aus dem SSE-Query-String, und
-# journald würde beides persistieren.
+# --no-access-log ist Pflicht: das Access-Log enthielte Client-IPs und das
+# Host-Token aus dem SSE-Query-String, und journald würde beides persistieren.
+#
+# --host: 127.0.0.1, wenn der Reverse Proxy auf DERSELBEN Maschine läuft.
+# Läuft er auf einer anderen (z.B. zentraler URZ-Proxy der Uni), muss hier
+# 0.0.0.0 stehen, sonst erreicht der Proxy die App nicht. Den Port dann per
+# Firewall auf die Proxy-Adressen beschränken, falls möglich.
 ExecStart=/opt/faktomat-live/venv/bin/python -m uvicorn server.app:app \
     --host 127.0.0.1 --port 8123 --no-access-log
 Restart=on-failure

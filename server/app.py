@@ -223,15 +223,26 @@ async def stream(code: str = PathParam(...),
 
     async def event_generator():
         last = None
+        idle = 0.0
         while True:
             current = (session.joined, session.submitted_count, session.reveal_stage)
             if current != last:
                 last = current
+                idle = 0.0
                 data = json.dumps({"joined": current[0], "submitted": current[1],
                                    "reveal_stage": current[2]})
                 yield f"data: {data}\n\n"
                 if once:
                     return
+            else:
+                # Keepalive als SSE-Kommentar: Reverse Proxys (z.B. der zentrale
+                # nginx der Uni) trennen idle Verbindungen nach ihrem
+                # read-timeout. Ein Kommentar alle 15 s hält den Stream offen,
+                # ohne dass der Client ein Event sieht.
+                idle += 1.0
+                if idle >= 15.0:
+                    idle = 0.0
+                    yield ": keepalive\n\n"
             await asyncio.sleep(1.0)
 
     return StreamingResponse(
