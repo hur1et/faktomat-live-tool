@@ -1,10 +1,51 @@
 # Changelog – Faktomat Live
 
 Alle nennenswerten Änderungen an diesem Projekt. Format lose nach
-[Keep a Changelog](https://keepachangelog.com/de/1.1.0/); Arbeitsschritte
-verweisen auf den Arbeitsplan in `UEBERGABE_faktomat-live.md` Abschnitt 9.
+[Keep a Changelog](https://keepachangelog.com/de/1.1.0/); "UEBERGABE" und
+"Schritt N" verweisen auf den Arbeitsplan der internen Spezifikation.
 
 ## [Unreleased]
+
+### Schritt 5 – Lasttest, Datenschutz-Review, Deployment-Vorbereitung
+
+Lasttest (`scripts/loadtest.py`, asyncio + httpx):
+- Simuliert N Teilnehmende parallel durch den echten Pfad: Join → Items →
+  plausibel zufällige Antworten → Scoring (Python-Referenz, identisch zum
+  JS-Client) → Submit. Ein Host-SSE-Stream zählt parallel mit; am Ende wird
+  das Aggregat gegen die Teilnehmerzahl geprüft. Fester Seed, Exit-Code
+  CI-tauglich.
+- Ergebnisse (lokal, ein Uvicorn-Worker): **100 Teilnehmende in 0,63 s**
+  (Submit-Median 130 ms, p95 249 ms), **300 in 1,91 s** (p95 776 ms), in
+  beiden Läufen 100 % erfolgreiche Submits, SSE-Zähler erreichte stabil N,
+  Bin-Summe = N. Wichtig zur Einordnung: alle Clients feuern im selben
+  Moment – das reale Event verteilt sich über Minuten, die Werte sind also
+  Worst Case.
+
+Datenschutz-Review (gegen die verbindlichen Constraints der Spezifikation):
+- Alle fünf Punkte am Code geprüft und belegt: nur `{d_prime, b_prime}`
+  verlassen das Gerät; RAM-only ohne einen einzigen Schreibzugriff aufs
+  Dateisystem; keine Cookies (Token in sessionStorage); Datenschutzhinweis
+  vor Start; kein Export-Pfad.
+- **Ein Fund, behoben:** Uvicorns Default-Access-Log enthielte Client-IPs
+  und das Host-Token aus dem SSE-Query-String (EventSource kann keine
+  Header setzen). Konsequenz: `--no-access-log` ist in allen
+  Deployment-Configs fest verdrahtet, ebenso Proxy-Logs ohne IPs bzw. aus.
+
+Deployment (`deploy/`, beide Gleise, Entscheidung am Vortag):
+- `faktomat-live.service`: systemd-Unit mit strikter Isolation – eigener
+  User, `MemoryMax=256M`, `CPUQuota=50%`, Dateisystem read-only
+  (`ProtectSystem=strict`; die App schreibt nie), localhost-Port.
+- `nginx-faktomat.conf` / `apache-faktomat.conf`: SSE-taugliche
+  Proxy-Snippets (`proxy_buffering off` bzw. `flushpackets=on`),
+  X-Forwarded-Header für den QR-Code, Access-Log aus.
+- `Dockerfile` + `fly.toml` für Fly.io als Plan B. Zwei Betriebsregeln aus
+  dem RAM-only-State: exakt EINE Maschine, Auto-Stop aus.
+- Einschränkung dokumentiert: Die App braucht eine eigene (Sub-)Domain,
+  kein Pfad-Präfix – der Client baut absolute Pfade.
+
+Repo:
+- Whitelist-Prinzip für Dokumentation: öffentlich sind nur README und
+  CHANGELOG, alle übrigen .md sind interne Arbeitsdokumente und gitignored.
 
 ### Schritt 6 – CD-konforme Gestaltung (FAKT-O-MAT-CD aus faktomat_flyer)
 

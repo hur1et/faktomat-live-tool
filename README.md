@@ -6,8 +6,9 @@ Auswertung von d′ (Diskriminationssensitivität) und b′ (ideologischer Bias)
 
 **Kein Studienbetrieb, keine Datenerhebung, keine Persistenz.** Rohantworten
 verlassen das Endgerät nie. Das Scoring läuft auf dem Gerät, übertragen werden
-nur zwei aggregierte Kennwerte. Details: [`ARCHITECTURE.md`](ARCHITECTURE.md),
-verbindliche Spezifikation: [`UEBERGABE_faktomat-live.md`](UEBERGABE_faktomat-live.md).
+nur zwei aggregierte Kennwerte. Der Server hält alles im RAM: keine Datenbank,
+keine Logdateien mit Nutzdaten, keine Cookies. Die Auswertung zeigt
+ausschließlich Gruppenverteilungen, freigeschaltet erst ab 15 Teilnahmen.
 
 ## Lokal ausprobieren
 
@@ -142,6 +143,16 @@ Die Scoring-Tests sind verbindlich: Die JS-Implementierung muss die
 Python-Referenz (`scoring/scoring_reference.py`) auf 1e-6 genau reproduzieren.
 Kein Deployment ohne grüne Tests.
 
+## Deployment
+
+Konfigurationen für den Event-Betrieb liegen in `deploy/`: eine systemd-Unit
+mit harten Ressourcenlimits, SSE-taugliche Snippets für nginx und Apache
+sowie Dockerfile und `fly.toml` für Fly.io. Zwei Regeln folgen aus dem
+RAM-only-Design: genau eine Instanz (der Session-Store lebt in einem
+Prozess), und der Server läuft ohne Access-Log (das Log enthielte sonst
+IPs und das Host-Token aus dem SSE-Query-String). Ein Lasttest liegt unter
+`scripts/loadtest.py`; Ergebnisse im CHANGELOG.
+
 ## Struktur
 
 | Ordner | Inhalt |
@@ -149,6 +160,8 @@ Kein Deployment ohne grüne Tests.
 | `scoring/` | Python-Referenz fürs Scoring, Benchmark-Berechnung |
 | `client/` | Teilnehmer- und Host-Ansicht (Vanilla JS, keine Frameworks) |
 | `server/` | FastAPI-Server: Sessions, Items, Aggregation, SSE |
+| `deploy/` | systemd-Unit, Proxy-Snippets, Fly.io-Config |
+| `scripts/` | Lasttest |
 
 ## Wissenschaftliche Grundlage
 

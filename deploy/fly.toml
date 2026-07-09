@@ -1,0 +1,28 @@
+# Fly.io-Konfiguration (Plan B, UEBERGABE 3). Deploy aus der Repo-Wurzel:
+#   fly launch --no-deploy   (einmalig, App-Name/Region bestätigen)
+#   fly deploy --config deploy/fly.toml --dockerfile deploy/Dockerfile
+#
+# ZWEI BETRIEBSREGELN, beide folgen aus dem RAM-only-State:
+#   1. Exakt EINE Maschine (fly scale count 1). Zwei Maschinen = zwei
+#      getrennte Session-Stores; Teilnehmende landen zufällig auf der
+#      falschen. Es gibt kein Redis, absichtlich (UEBERGABE 3).
+#   2. auto_stop aus. Fly würde die Maschine bei Leerlauf anhalten und
+#      damit die Session mitten im Event löschen.
+
+app = "faktomat-live"
+primary_region = "fra"   # Frankfurt: nächstgelegene Region, EU
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true          # HTTPS zwingend (UEBERGABE 3)
+  auto_stop_machines = "off"  # RAM-State stirbt sonst bei Leerlauf
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  memory = "256mb"   # gleiche Grenze wie die systemd-Unit; reicht laut Lasttest
+  cpu_kind = "shared"
+  cpus = 1

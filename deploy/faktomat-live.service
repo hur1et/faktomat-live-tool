@@ -1,0 +1,52 @@
+# systemd-Unit für den Uniserver (UEBERGABE 3a.2: strikte Isolation).
+#
+# Leitprinzip: Das Risiko läuft in Richtung formr, nicht in Richtung Event.
+# Eigener User, harte Ressourcenlimits, Dateisystem read-only – die App
+# schreibt ohnehin nie (RAM-only, siehe DATENSCHUTZ-REVIEW.md Punkt 2).
+#
+# Installation (als root, einmalig):
+#   useradd --system --home /opt/faktomat-live --shell /usr/sbin/nologin faktomat
+#   mkdir -p /opt/faktomat-live && chown faktomat: /opt/faktomat-live
+#   # Repo + venv nach /opt/faktomat-live, items.json daneben legen
+#   cp deploy/faktomat-live.service /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now faktomat-live
+#
+# Neustart-Zugriff für Julius am Eventtag (UEBERGABE 3a.4, sudoers-Zeile):
+#   julius ALL=(root) NOPASSWD: /usr/bin/systemctl restart faktomat-live
+
+[Unit]
+Description=Faktomat Live (Event-Tool, RAM-only, keine Persistenz)
+After=network.target
+
+[Service]
+Type=simple
+User=faktomat
+Group=faktomat
+WorkingDirectory=/opt/faktomat-live
+
+# Items sind Pflicht (Startabbruch ohne), Benchmark ist optional (Feature-Flag).
+Environment=FAKTOMAT_ITEMS=/opt/faktomat-live/items.json
+# FAKTOMAT_DEV hier NIEMALS setzen: würde das Anonymitäts-Gate umgehbar machen.
+
+# --no-access-log ist Pflicht (DATENSCHUTZ-REVIEW Fund 1): das Access-Log
+# enthielte Client-IPs und das Host-Token aus dem SSE-Query-String, und
+# journald würde beides persistieren.
+ExecStart=/opt/faktomat-live/venv/bin/python -m uvicorn server.app:app \
+    --host 127.0.0.1 --port 8123 --no-access-log
+Restart=on-failure
+RestartSec=2
+
+# Ressourcenlimits (UEBERGABE 3a.2) – formr darf nichts davon spüren.
+MemoryMax=256M
+CPUQuota=50%
+
+# Härtung: die App liest nur (items.json, benchmark.json, client/) und
+# schreibt nie – also darf das ganze Dateisystem read-only sein.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+
+[Install]
+WantedBy=multi-user.target

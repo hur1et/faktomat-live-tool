@@ -20,7 +20,16 @@ data/raw/
 items.real.json
 benchmark.real.json
 
-# --- OS / Editor ---
+# --- Interne Arbeitsdokumente (Whitelist-Prinzip) ---
+# Öffentlich sind nur README und CHANGELOG. Alle anderen .md sind interne
+# Arbeitsdokumente (Spezifikation, Architektur, Moderation, Reviews) und
+# bleiben lokal. Wichtiges daraus wandert in README oder CHANGELOG.
+*.md
+!/README.md
+!/CHANGELOG.md
+
+# --- Agent-/Editor-Artefakte ---
+.claude/
 .DS_Store
 Thumbs.db
 .vscode/
