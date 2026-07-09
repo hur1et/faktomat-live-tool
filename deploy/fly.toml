@@ -9,7 +9,7 @@
 #   2. auto_stop aus. Fly würde die Maschine bei Leerlauf anhalten und
 #      damit die Session mitten im Event löschen.
 
-app = "faktomat-live"
+app = "faktomat-live-jena"
 primary_region = "fra"   # Frankfurt: nächstgelegene Region, EU
 
 [build]
