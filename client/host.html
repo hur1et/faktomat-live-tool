@@ -36,6 +36,10 @@
   button.active { background: var(--gelb); }
   button:disabled { opacity: 0.35; cursor: not-allowed; }
   #demo-btn { margin-left: auto; border-style: dashed; font-weight: 400; }
+  #new-session-btn { border-style: dashed; font-weight: 400; }
+  #lobby-new-session { border-style: dashed; font-weight: 400;
+                       font-size: 0.9rem; min-height: 0; padding: 0.45rem 0.9rem;
+                       margin-top: 0.9rem; }
   #gate-hint, #status { color: var(--muted); font-size: 0.95rem; }
   #demo-banner {
     display: none; background: #fff3cd; border: 1px solid #b8860b;
@@ -43,7 +47,22 @@
     margin-bottom: 1rem; font-weight: 600;
   }
   #frame-title { font-size: 1.35rem; margin-bottom: 0.5rem; min-height: 1.8rem; }
-  #chart { width: 100%; height: 62vh; }
+  /* Chip-Legende: Farbträger direkt am Chart, vom Publikum lesbar. */
+  #chips { display: flex; gap: 1.5rem; font-size: 1.15rem; font-weight: 600;
+           min-height: 1.6rem; margin-bottom: 0.25rem; }
+  #chips i { display: inline-block; width: 1em; height: 1em; border-radius: 3px;
+             margin-right: 0.45em; vertical-align: -0.12em; }
+  /* Festes Seitenverhältnis = feste viewBox: Text im SVG wird NIE verzerrt.
+     (preserveAspectRatio="none" hatte Beschriftungen je nach Beamer-Format
+     breit- oder plattgezogen.) */
+  #chart { width: 100%; height: auto; aspect-ratio: 1000 / 560; max-height: 62vh;
+           display: block; margin: 0 auto; }
+  /* Reveal ist ein inszenierter Moment: Inhalt wächst kurz ins Bild. */
+  #chart g.reveal { animation: reveal-rise 0.45s ease-out; }
+  @keyframes reveal-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+  }
   #legend { color: var(--muted); font-size: 0.95rem; margin-top: 0.5rem; }
 
   /* --- Lobby (Einstiegsseite mit QR) --- */
@@ -78,6 +97,7 @@
   <p id="join-url"></p>
   <p id="lobby-counter"><strong>0</strong> beigetreten · <strong>0</strong> abgeschlossen</p>
   <button id="to-stages">Zur Auswertung →</button>
+  <button id="lobby-new-session">Neue Session</button>
 </section>
 
 <div id="main-view">
@@ -87,16 +107,20 @@
 </header>
 
 <div id="controls">
-  <button id="stage-1">Stufe 1 – Unterscheidung d′</button>
-  <button id="stage-2">Stufe 2 – Asymmetrie b′</button>
-  <button id="stage-3">Stufe 3 – Raum-Marker</button>
+  <button id="stage-0">Erklärung</button>
+  <button id="stage-1">Stufe 1 – Sensitivität d′</button>
+  <button id="stage-2">Stufe 2 – Verzerrung b′</button>
+  <button id="stage-3">Stufe 3 – Median</button>
+  <button id="stage-4">Stufe 4 – Einordnung</button>
   <span id="gate-hint"></span>
   <button id="demo-btn">Demo-Modus</button>
+  <button id="new-session-btn">Neue Session</button>
 </div>
 
 <div id="demo-banner">DEMO-MODUS – synthetische Daten, keine echten Teilnahmen</div>
 <p id="frame-title"></p>
-<svg id="chart" preserveAspectRatio="none"></svg>
+<div id="chips"></div>
+<svg id="chart"></svg>
 <p id="legend"></p>
 <p id="status"></p>
 </div><!-- /main-view -->

@@ -127,6 +127,20 @@ def join_page(code: str = PathParam(...)) -> FileResponse:
     return FileResponse(_CLIENT_DIR / "join.html", media_type="text/html")
 
 
+@app.get("/api/session/{code}/benchmark")
+def get_benchmark(code: str = PathParam(...)) -> dict:
+    """
+    Aggregat-Kennwerte der Vergleichsstichprobe (publizierte Forschungsdaten,
+    keine Personendaten, nichts aus diesem Raum). Genutzt von der Erklärfolie
+    im Host-View und der Perzentil-Einordnung im privaten Teilnehmer-Feedback;
+    deshalb bewusst ohne Host-Token. 404, wenn kein Benchmark geladen ist.
+    """
+    _require_session(code)
+    if BENCHMARK is None:
+        raise HTTPException(status_code=404, detail="Kein Benchmark geladen.")
+    return BENCHMARK
+
+
 @app.post("/api/session")
 def create_session() -> dict:
     """Legt eine neue Session an. Response: {code, host_token}."""

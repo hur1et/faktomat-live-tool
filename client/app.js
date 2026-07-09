@@ -12,6 +12,7 @@
 
 import { computeScores } from "./scoring.js";
 import { submitWithRetry } from "./submit-queue.js";
+import { percentileOf } from "./benchmark-util.js";
 
 // Session-Code aus dem Pfad /join/{code}.
 const code = window.location.pathname.split("/").filter(Boolean).pop();
@@ -86,6 +87,7 @@ async function finish() {
   $("result-d").textContent = dPrime.toFixed(2);
   $("result-b").textContent = bPrime.toFixed(2);
   show("screen-result");
+  annotatePercentile(bPrime); // läuft parallel zum Submit, blockiert nichts
 
   const status = $("submit-status");
   status.textContent = "Übertrage Gruppenbeitrag …";
@@ -113,6 +115,27 @@ async function finish() {
       "Es fließt nur nicht in die Raumgrafik ein.";
     status.classList.add("error");
   }
+}
+
+/**
+ * Perzentil-Einordnung des eigenen b' relativ zur Vergleichsstichprobe.
+ * Optionaler Zusatz: der Server liefert nur Forschungsaggregate (keine
+ * Raumdaten); scheitert der Abruf, bleibt die Zeile einfach leer.
+ */
+async function annotatePercentile(bPrime) {
+  try {
+    const r = await fetch(api("benchmark"));
+    if (!r.ok) return;
+    const bench = await r.json();
+    const q = bench.b_prime ? bench.b_prime.quantiles : null;
+    if (!q) return;
+    const pct = percentileOf(q, bPrime);
+    const n = bench.b_prime.summary ? bench.b_prime.summary.n : null;
+    $("result-b-percentile").textContent =
+      `Einordnung: Dein b′ liegt ungefähr am ${pct}. Perzentil der ` +
+      `Vergleichsstichprobe${n ? ` (N = ${n})` : ""}: ${pct} % liegen unter, ` +
+      `${100 - pct} % über deinem Wert.`;
+  } catch { /* Einordnung ist optional, kein Fehlerzustand */ }
 }
 
 $("btn-start").addEventListener("click", start);

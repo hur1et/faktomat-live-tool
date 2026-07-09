@@ -6,6 +6,59 @@ Alle nennenswerten Änderungen an diesem Projekt. Format lose nach
 
 ## [Unreleased]
 
+### Host-Grafiken überarbeitet, Erklärfolie, Perzentil-Einordnung
+
+Skalierung (Auslöser: Review Julius):
+- `preserveAspectRatio="none"` entfernt: das SVG wurde auf Containermaße
+  gestreckt und hat alle Beschriftungen je nach Beamer-Format verzerrt.
+  Jetzt festes Seitenverhältnis über CSS `aspect-ratio`, Text bleibt formtreu.
+- b′-Achse symmetrisch um null: vorher lief sie von Datenminimum bis
+  -maximum, bei einseitigen Räumen wirkte eine politische Seite allein durch
+  die Achsenwahl schwerer. d′-Achse schließt immer die 0 ein (Zufallsniveau
+  als Anker sonst ggf. außerhalb des Bilds).
+
+Lesbarkeit (Beamer, Betrachtung aus Metern):
+- Verbale Achsen-Anker statt nackter Zahlen: „Zufallsniveau" /
+  „höhere Sensitivität", „linksgerichtete/rechtsgerichtete Verzerrung" /
+  „keine Asymmetrie"; Zahlen-Ticks klein auf rundem 0,5er-Raster.
+- Raum-KDE als gefüllte Fläche statt 4px-Linie; Benchmark als graue
+  Stufen-Silhouette mit Kontur – zwei gleichartige, vergleichbare Formen
+  statt Balken-gegen-Kurve. Chip-Legende am Chart („dieser Raum" /
+  „Vergleichsstichprobe (N = 1518)"), N-Angabe des Raums in der Ecke,
+  Median-Label mit Kollisionsschutz am Bildrand, Reveal-Einblendung (CSS).
+- Alle Texte auf die Terminologie von Stolp et al. umgestellt
+  (Diskriminationssensitivität, ideologische Verzerrung, Zufallsniveau,
+  Median; b′-Definition als Genauigkeits-Differenz statt Umschreibung).
+
+Erklär-/Wartefolie (Button „Erklärung", automatisch nach der Lobby):
+- Graue b′-Verteilung der Vergleichsstichprobe mit Erklär-Overlays,
+  darunter das Lesebeispiel aus Box 1 des Papers (gleiche Trefferzahl,
+  unterschiedliches b′). Zeigt KEINE Raumdaten und ist deshalb auch unter
+  dem 15er-Gate frei – gedacht als Standbild, während das Publikum
+  bearbeitet. Mit der Freigabe verschwinden die Overlays und die
+  Raumverteilung erscheint über denselben Forschungsdaten.
+
+Perzentil-Einordnung:
+- Stufe 4 „Einordnung" im Host-View: kumulative b′-Verteilung der
+  Vergleichsstichprobe (S-Kurve aus dem 99er-Quantilgitter), Raum-Median
+  orange auf die Kurve projiziert, Perzentil ablesbar. Serverseitig eine
+  Ansicht auf Stufe-3-Daten, das Reveal-Gate gilt unverändert.
+- Teilnehmer-Feedback (Mobile): unter dem eigenen b′ die Einordnung
+  „~N. Perzentil der Vergleichsstichprobe"; läuft parallel zum Submit,
+  bleibt bei Abruffehler leer (optionaler Zusatz, kein Fehlerzustand).
+- Neuer Endpunkt `GET /api/session/{code}/benchmark`: liefert nur die
+  publizierten Forschungsaggregate (keine Raumdaten), deshalb bewusst ohne
+  Host-Token – nutzen Erklärfolie und Mobile gemeinsam. 2 neue Tests.
+- `client/benchmark-util.js`: geteilte Perzentil-Funktion (Bindungen im
+  Gitter mittig, Ergebnis auf 1–99 begrenzt), 5 eigene Tests.
+
+Bedienung:
+- „Neue Session"-Button (Leiste + Lobby, mit Sicherheitsabfrage): legt eine
+  frische Session an und lädt die Host-View unter neuem Code – neuer QR,
+  Zähler auf null; Teilnahme-Tokens der Handys gelten nur für den alten Code.
+
+Testsumme: **48 Python + 18 JS = alle grün.**
+
 ### Schritt 5 – Lasttest, Datenschutz-Review, Deployment-Vorbereitung
 
 Lasttest (`scripts/loadtest.py`, asyncio + httpx):
@@ -92,7 +145,7 @@ Repo:
   Perzentile p1–p99, Summary. Truth-Key aus `config/item_key_ibe24.json`
   (verifiziert, Stolp Jan 2026), inkl. AddIBE-Spalten-Mapping für IBE11/12/17/18.
 - Validierung: mean d′ = 0.4451 vs. 0.451 in Stolps eigener Type-1-Replikation
-  (Differenz = andere Randkorrektur) ✅. b′: M = 0.11, Md = 0.00, SD = 0.68.
+  (Differenz = andere Randkorrektur). b′: M = 0.11, Md = 0.00, SD = 0.68.
 - Item-Plausibilisierung nach Julius' Hinweis (aufsteigende Nummerierung):
   alle 24 Texte inhaltlich gegen truth_value/task/domain geprüft – konsistent.
   Restrisiko Text↔ID dokumentiert; finale Absicherung braucht das

@@ -118,7 +118,7 @@ abgegeben haben. Zum Ausprobieren gibt es zwei Wege:
 „Demo-Modus" klicken. Die Grafiken zeigen dann synthetische Daten, ein gelber
 Banner macht das unübersehbar. Funktioniert auch komplett ohne Teilnehmende.
 
-**Testmodus (mit 1 bis 3 echten Geräten):** Wer den echten Datenweg sehen will
+**Testmodus:** Wer den echten Datenweg sehen will
 (Handy gibt ab, Wert erscheint in der Grafik), startet den Server als
 Dev-Instanz:
 
@@ -132,16 +132,41 @@ unterhalb der 15er-Grenze, mit deutlichem Hinweis im Banner. Ohne diese
 Variable ist der Weg gesperrt. Für einen echten Event-Einsatz die Variable
 niemals setzen, sonst ließe sich die Anonymitätsgrenze umgehen.
 
+## Datenschutz
+
+Das Tool ist so gebaut, dass es die interessanten Daten gar nicht erst hat:
+
+- Die Einzelantworten werden auf dem Gerät ausgewertet und nie übertragen.
+  Der Server nimmt pro Person genau zwei aggregierte Kennwerte an, alles
+  andere im Request wird ignoriert.
+- Es gibt keine Datenbank und keinen einzigen Schreibzugriff aufs
+  Dateisystem. Der Zustand lebt im RAM und stirbt mit dem Prozess.
+- Keine Cookies. Das Teilnahme-Token liegt im sessionStorage und stirbt mit
+  dem Tab.
+- Der Server läuft ohne Access-Log, die Proxy-Snippets in `deploy/` loggen
+  keine IPs.
+- Die Auswertung öffnet erst ab 15 Teilnahmen, zeigt nur Verteilungen
+  (Histogramm-Bins mit mindestens 3 Personen, Dichtekurve, Median) und hat
+  keinen Export-Pfad. Einzelwerte verlassen den Server nie.
+
 ## Tests
 
 ```
 python -m pytest server/ -q
-node --test client/scoring.test.mjs client/submit-queue.test.mjs
+node --test client/scoring.test.mjs client/submit-queue.test.mjs client/benchmark-util.test.mjs
 ```
+
+Abgedeckt sind das Scoring (Python-Referenz und JS-Port), die Item-Validierung,
+der Session-Lebenszyklus mit Ein-Abgabe-Regel und Wertebereichs-Prüfung, die
+Anonymitätsregeln der Aggregation (15er-Grenze, Bin-Zusammenlegung), die
+Perzentil-Einordnung und die Endpunkte inklusive SSE und QR-Code – aktuell
+48 Python- und 18 JS-Tests.
 
 Die Scoring-Tests sind verbindlich: Die JS-Implementierung muss die
 Python-Referenz (`scoring/scoring_reference.py`) auf 1e-6 genau reproduzieren.
-Kein Deployment ohne grüne Tests.
+Kein Deployment ohne grüne Tests. Dazu kommt ein Lasttest
+(`scripts/loadtest.py`), der simulierte Teilnehmende parallel durch den
+kompletten Ablauf schickt; Ergebnisse stehen im CHANGELOG.
 
 ## Deployment
 

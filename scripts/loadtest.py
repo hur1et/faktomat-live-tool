@@ -13,7 +13,7 @@ Entscheidungen:
   - Antworten werden WIRKLICH gescored (scoring_reference), nicht als
     Zufallszahlen an /submit geschickt: so testet der Lasttest denselben
     Wertebereich und dieselbe Payload wie echte Handys.
-  - Fester Seed (Reproduzierbarkeit, CLAUDE_RULES).
+  - Fester Seed (Reproduzierbarkeit).
 
 Voraussetzung: laufender Server, z.B.
     FAKTOMAT_ITEMS=server/items.example.json python -m uvicorn server.app:app --port 8100

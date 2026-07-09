@@ -275,6 +275,40 @@ def test_nogate_returns_data_below_gate_with_dev_flag(client, monkeypatch):
     assert "d_prime" not in normal
 
 
+# --- Benchmark-Endpunkt (Erklärfolie + Perzentil-Einordnung) -----------------
+
+def test_benchmark_endpoint_serves_aggregates(monkeypatch, tmp_path):
+    bench = {"source": "Test N=42",
+             "b_prime": {"quantiles": {"p": [50], "values": [0.0]}}}
+    bp = tmp_path / "benchmark.json"
+    bp.write_text(json.dumps(bench), encoding="utf-8")
+    monkeypatch.setenv("FAKTOMAT_ITEMS", str(EXAMPLE))
+    monkeypatch.setenv("FAKTOMAT_BENCHMARK", str(bp))
+    import server.app as app_module
+    importlib.reload(app_module)
+    c = TestClient(app_module.app)
+
+    code = c.post("/api/session").json()["code"]
+    # Bewusst OHNE Host-Token abrufbar: enthält nur Forschungsaggregate,
+    # nichts aus der Session (braucht auch das Teilnehmer-Feedback).
+    r = c.get(f"/api/session/{code}/benchmark")
+    assert r.status_code == 200
+    assert r.json()["b_prime"]["quantiles"]["p"] == [50]
+
+
+def test_benchmark_endpoint_404s(monkeypatch, tmp_path):
+    # Ohne geladene Benchmark-Datei und bei unbekannter Session -> 404.
+    monkeypatch.setenv("FAKTOMAT_ITEMS", str(EXAMPLE))
+    monkeypatch.setenv("FAKTOMAT_BENCHMARK", str(tmp_path / "fehlt.json"))
+    import server.app as app_module
+    importlib.reload(app_module)
+    c = TestClient(app_module.app)
+
+    code = c.post("/api/session").json()["code"]
+    assert c.get(f"/api/session/{code}/benchmark").status_code == 404
+    assert c.get("/api/session/deadbeef/benchmark").status_code == 404
+
+
 # --- QR-Code (Host-Lobby) ----------------------------------------------------
 
 def test_qr_svg_served(client):
